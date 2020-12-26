@@ -1,0 +1,74 @@
+$color-altitude-0: #9e0505;
+$color-altitude-1: lighten($color-altitude-0, 10);
+$color-altitude-2: lighten($color-altitude-0, 20);
+$color-altitude-3: lighten($color-altitude-0, 30);
+$color-altitude-4: #1b499e;
+$color-altitude-5: lighten($color-altitude-4, 10);
+$color-altitude-6: lighten($color-altitude-4, 20);
+$color-altitude-7: lighten($color-altitude-4, 30);
+$color-altitude-8: #249c32;
+$color-altitude-9: lighten($color-altitude-8, 10);
+$color-altitude-10: lighten($color-altitude-8, 20);
+$color-altitude-11: lighten($color-altitude-8, 30);
+
+.plane-icon {
+  path {
+    stroke: #222222;
+    stroke-width: 8px;
+  }
+  .altitude-0 {
+    path {
+      fill: $color-altitude-0;
+    }
+  }
+  .altitude-1 {
+    path {
+      fill: $color-altitude-1;
+    }
+  }  
+  .altitude-2 {
+    path {
+      fill: $color-altitude-2;
+    }
+  }  
+  .altitude-3 {
+    path {
+      fill: $color-altitude-3;
+    }
+  }  
+  .altitude-4 {
+    path {
+      fill: $color-altitude-4;
+    }
+  }  
+  .altitude-5 {
+    path {
+      fill: $color-altitude-5;
+    }
+  }  
+  .altitude-6 {
+    path {
+      fill: $color-altitude-6;
+    }
+  }  
+  .altitude-7 {
+    path {
+      fill: $color-altitude-7;
+    }
+  }  
+  .altitude-8 {
+    path {
+      fill: $color-altitude-8;
+    }
+  }  
+  .altitude-9 {
+    path {
+      fill: $color-altitude-9;
+    }
+  }  
+  .altitude-10 {
+    path {
+      fill: $color-altitude-10;
+    }
+  }  
+}

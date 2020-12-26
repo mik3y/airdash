@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "./MapView.scss";
 
+import PlaneIcon from "./PlaneIcon";
 import ReadsbClient from "./ReadsbClient";
 import L from "leaflet";
 
@@ -50,6 +51,7 @@ const MapView = (props) => {
       <Marker
         key={a.addr}
         position={[a.lat, a.lon]}
+        icon={PlaneIcon(a)}
       >
         <Popup>
           <div>
