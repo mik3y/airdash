@@ -10,6 +10,8 @@ const MAX_UPDATES_PER_CLIENT = 100;
 class ConnectionManager {
   constructor() {
     this.aisConnections = new Map();
+
+    // Maps mmsi -> type -> merged most recent data.
     this.aisUpdates = new Map();
   }
 
@@ -20,7 +22,7 @@ class ConnectionManager {
     }
     const client = new AISClient(host, port);
     this.aisConnections.set(connectionId, client);
-    this.aisUpdates.set(connectionId, []);
+    this.aisUpdates.set(connectionId, new Map());
     client.onMessage = (message) => {
       this._handleNewMessage(connectionId, client, message);
     };
@@ -32,6 +34,7 @@ class ConnectionManager {
     if (this.aisConnections.has(connectionId)) {
       const client = this.aisConnections.get(connectionId);
       this.aisConnections.delete(connectionId);
+      this.aisUpdates.delete(connectionId);
       client.disconnect();
     }
   }
@@ -43,13 +46,32 @@ class ConnectionManager {
   }
 
   _handleNewMessage(connectionId, client, message) {
-    let updateList = this.aisUpdates.get(connectionId);
-    updateList.push(message);
-    if (updateList.length > MAX_UPDATES_PER_CLIENT) {
-      this.aisUpdates.set(connectionId, updateList.slice(-MAX_UPDATES_PER_CLIENT));
-    }
-  }
+    const updateMap = this.aisUpdates.get(connectionId);
+    const key = `${message.mmsi}`;
 
+    if (!key) {
+      return;
+    }
+
+    if (!updateMap.has(key)) {
+      updateMap.set(key, new Map());
+    }
+    const vesselData = updateMap.get(key);
+
+    const messageType = `${message.type}`;
+    const messageData = vesselData.get(messageType) || {};
+
+    for (const [key, value] of Object.entries(message)) {
+      if (value === null) {
+        continue;
+      }
+      messageData[key] = value;
+    }
+    messageData.lastUpdateMillis = new Date() / 1000;
+
+    vesselData.set(messageType, messageData);
+    vesselData.set('lastUpdateMillis', messageData.lastUpdateMillis);
+  }
 }
 
 module.exports = ConnectionManager;

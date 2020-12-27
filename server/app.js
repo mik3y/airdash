@@ -1,25 +1,25 @@
-const Koa = require('koa');
-const Router = require('koa-router');
-const views = require('koa-views');
-const koaStatic = require('koa-static');
-const mount = require('koa-mount');
-const fs = require('fs');
-const winston = require('winston');
-const koaLogger = require('koa2-winston').logger;
+const Koa = require("koa");
+const Router = require("koa-router");
+const views = require("koa-views");
+const koaStatic = require("koa-static");
+const mount = require("koa-mount");
+const fs = require("fs");
+const winston = require("winston");
+const koaLogger = require("koa2-winston").logger;
 
-const ConnectionManager = require('./connection-manager');
+const ConnectionManager = require("./connection-manager");
 
 const TEMPLATE_DIR = `${__dirname}/templates`;
-const ASSET_PATH_PREFIX = '/assets/bundles';
+const ASSET_PATH_PREFIX = "/assets/bundles";
 const ASSET_DIR = `${__dirname}/../webpack/dist/app`;
 
 let CSS_BUNDLE_URL;
 let JS_BUNDLE_URL;
 
-if (process.env.WEBPACK_TARGET === 'local') {
+if (process.env.WEBPACK_TARGET === "local") {
   // In dev, use automagic (in-memory) webpack-dev-server output filenames.
-  CSS_BUNDLE_URL = '/loader.css';
-  JS_BUNDLE_URL = '/loader.js';
+  CSS_BUNDLE_URL = "/loader.css";
+  JS_BUNDLE_URL = "/loader.js";
 } else {
   // In prod, load bundle files from webpack output filenames.
   // If erroring below, it means someone forgot to `build-prod`.
@@ -55,19 +55,19 @@ const requestFormatter = winston.format((info, opts) => {
     return info;
   }
   const { req, res, duration } = info;
-  const message = `${res.status} | ${req.method} ${req.url} duration=${duration} for=${req['x-forwarded-for']} agent=${req.header['user-agent']}`;
+  const message = `${res.status} | ${req.method} ${req.url} duration=${duration} for=${req["x-forwarded-for"]} agent=${req.header["user-agent"]}`;
   return {
     ...info,
     message,
     req: undefined,
     res: undefined,
-    duration: undefined, 
+    duration: undefined,
     started_at: undefined,
   };
 });
 
 const logger = winston.createLogger({
-  level: 'info',
+  level: "info",
   format: winston.format.combine(
     winston.format.errors({ stack: true }),
     stackFormatter(),
@@ -80,10 +80,25 @@ const logger = winston.createLogger({
         winston.format.colorize(),
         winston.format.simple()
       ),
-      label: 'dfe.main',
+      label: "dfe.main",
     }),
   ],
 });
+
+const mapToObject = (map) => {
+  if (!map) {
+    return null;
+  }
+  const result = Object.create(null);
+  map.forEach((value, key) => {
+    if (value instanceof Map) {
+      result[key] = mapToObject(value);
+    } else {
+      result[key] = value;
+    }
+  });
+  return result;
+};
 
 const App = ({ initialMiddleware }) => {
   const app = new Koa();
@@ -91,67 +106,69 @@ const App = ({ initialMiddleware }) => {
 
   const connections = new ConnectionManager();
 
-  app.on('error', err => {
-    logger.error('An uncaught exception was trapped.');
+  app.on("error", (err) => {
+    logger.error("An uncaught exception was trapped.");
     logger.error(err);
   });
 
-  app.use(koaLogger({
-    logger,
-  }));
+  app.use(
+    koaLogger({
+      logger,
+    })
+  );
 
   if (initialMiddleware) {
-    logger.info('Injecting initial middleware ...');
+    logger.info("Injecting initial middleware ...");
     app.use(initialMiddleware);
   }
 
   app.use(mount(ASSET_PATH_PREFIX, koaStatic(ASSET_DIR)));
-  app.use(mount('/static/app', koaStatic(ASSET_DIR)));
+  app.use(mount("/static/app", koaStatic(ASSET_DIR)));
 
   const router = new Router();
 
   router.use(
     views(TEMPLATE_DIR, {
       map: {
-        html: 'nunjucks'
-      }
+        html: "nunjucks",
+      },
     })
   );
 
-  router.get('/test', async ctx => {
+  router.get("/test", async (ctx) => {
     ctx.state = { CSS_BUNDLE_URL, JS_BUNDLE_URL };
-    ctx.set('Cache-Control', 'public, max-age=60');
-    ctx.set('X-Xss-Protection', '1; mode=block');
-    await ctx.render('index.html');
+    ctx.set("Cache-Control", "public, max-age=60");
+    ctx.set("X-Xss-Protection", "1; mode=block");
+    await ctx.render("index.html");
   });
 
-  router.get('/api/sources/ais/:hostname/:port', async ctx => {
+  router.get("/api/sources/ais/:hostname/:port", async (ctx) => {
     const { hostname, port } = ctx.params;
     const updates = connections.getAISData(hostname, port);
     if (!updates) {
       ctx.status = 404;
     }
     ctx.body = {
-      updates,
+      updates: mapToObject(updates),
     };
   });
 
-  router.post('/api/sources/ais/:hostname/:port', async ctx => {
+  router.post("/api/sources/ais/:hostname/:port", async (ctx) => {
     const { hostname, port } = ctx.params;
     const updates = connections.getAISData(hostname, port);
     if (updates) {
       ctx.status = 409;
       ctx.body = {
-        status: 'error',
+        status: "error",
         error: {
-          message: 'Already connected',
+          message: "Already connected",
         },
       };
       return;
     }
     connections.addAISConnection(hostname, port);
     ctx.body = {
-      status: 'ok',
+      status: "ok",
     };
   });
 

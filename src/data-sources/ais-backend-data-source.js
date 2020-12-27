@@ -39,7 +39,11 @@ export default class AisBackendDataSource {
   }
 
   async check() {
+    try {
+      await this.client.getAISUpdates(this.hostname, this.port);
+    } catch (error) {
       await this.client.addAISSource(this.hostname, this.port);
+    }
   }
 
   async _pollNow() {
@@ -54,8 +58,20 @@ export default class AisBackendDataSource {
   }
 
   _processUpdate(update) {
-    debug("AIS update:", update);
-    // TODO(mikey): Process the update!
+    const { updates } = update;
+    const updateMessage = Object.values(updates)
+      .map((v) => v["1"])
+      .filter(Boolean)
+      .map((type1Message) => {
+        return {
+          type: "vessel",
+          id: `${type1Message.mmsi}`,
+          vessel: type1Message,
+        };
+      });
+    if (this.onUpdate) {
+      this.onUpdate(updateMessage);
+    }
   }
 
   _processError(error) {

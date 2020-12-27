@@ -4,6 +4,7 @@ import "./MapView.scss";
 
 import DataHubContext from "./DataHubContext";
 import PlaneIcon from "./PlaneIcon";
+import BoatIcon from "./BoatIcon";
 import L from "leaflet";
 
 // https://github.com/Leaflet/Leaflet/issues/4968#issuecomment-483402699
@@ -16,25 +17,43 @@ L.Icon.Default.mergeOptions({
 
 const MapView = (props) => {
   const { vessels } = useContext(DataHubContext);
-  const aircraft = Array.from(vessels.values())
-    .filter((v) => v.type === "aircraft")
-    .map((v) => v.vessel);
 
-  const markers = aircraft.map((a) => {
-    return (
-      <Marker
-        key={a.addr}
-        position={[a.lat, a.lon]}
-        icon={PlaneIcon(a)}
-      >
-        <Popup>
-          <div>
-            <h2>{a.flight}</h2>
-          </div>
-        </Popup>
-      </Marker>
-    );
-  });
+  const markers = Array.from(vessels.values()).map((entry) => {
+    const { type, id, vessel } = entry;
+    if (type === 'aircraft') {
+      return (
+        <Marker
+          key={id}
+          position={[vessel.lat, vessel.lon]}
+          icon={PlaneIcon(vessel)}
+        >
+          <Popup>
+            <div>
+              <h2>{vessel.flight}</h2>
+            </div>
+          </Popup>
+        </Marker>
+      );
+    } else if (type === 'vessel') {
+      if (!vessel.lat || !vessel.lon) {
+        return null;
+      }
+      return (
+        <Marker
+          key={id}
+          position={[vessel.lat, vessel.lon]}
+          icon={BoatIcon(vessel)}
+        >
+          <Popup>
+            <div>
+              <h2>{vessel.mmsi}</h2>
+            </div>
+          </Popup>
+        </Marker>
+      );
+    }
+    return null;
+  }).filter(Boolean);
 
   return (
     <div>
