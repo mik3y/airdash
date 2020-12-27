@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:version="1.0 (4035a4f, 2020-05-01)" sodipodi:docname="boat.svg" width="72.248909mm" height="72.248894mm" viewBox="0 0 256.00007 256.00002" id="svg5332" version="1.1">
+   <sodipodi:namedview inkscape:current-layer="svg5332" inkscape:window-maximized="0" inkscape:window-y="25" inkscape:window-x="0" inkscape:cy="106.5844" inkscape:cx="87.769886" inkscape:zoom="1.4383659" showgrid="false" id="namedview847" inkscape:window-height="722" inkscape:window-width="1271" inkscape:pageshadow="2" inkscape:pageopacity="0" guidetolerance="10" gridtolerance="10" objecttolerance="10" borderopacity="1" bordercolor="#666666" pagecolor="#ffffff" />
+   <title id="title6816">Boat</title>
+   <defs id="defs5334" />
+   <g id="layer1" transform="translate(-362.5464,-406.21469)">
+      <path sodipodi:nodetypes="ccccccc" id="rect4582-4" d="m 490.54644,414.7248 c -28.59676,12.82252 -54.89625,74.27264 -59.3298,95.77245 -6.18855,45.8703 -0.99696,111.2888 -0.87826,142.55557 l 60.20806,-19.0174 51.73491,18.36562 c 3.17519,-46.8687 2.24885,-96.22972 -0.61469,-141.89656 -0.61967,-22.20914 -29.66706,-82.42254 -51.12022,-95.77968 z" style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;color-interpolation:sRGB;color-interpolation-filters:linearRGB;fill:#808080;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+   </g>
+</svg>
