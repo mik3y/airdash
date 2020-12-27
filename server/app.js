@@ -7,6 +7,8 @@ const fs = require('fs');
 const winston = require('winston');
 const koaLogger = require('koa2-winston').logger;
 
+const ConnectionManager = require('./connection-manager');
+
 const TEMPLATE_DIR = `${__dirname}/templates`;
 const ASSET_PATH_PREFIX = '/assets/bundles';
 const ASSET_DIR = `${__dirname}/../webpack/dist/app`;
@@ -87,6 +89,8 @@ const App = ({ initialMiddleware }) => {
   const app = new Koa();
   logger.info(`Starting server ...`);
 
+  const connections = new ConnectionManager();
+
   app.on('error', err => {
     logger.error('An uncaught exception was trapped.');
     logger.error(err);
@@ -119,6 +123,36 @@ const App = ({ initialMiddleware }) => {
     ctx.set('Cache-Control', 'public, max-age=60');
     ctx.set('X-Xss-Protection', '1; mode=block');
     await ctx.render('index.html');
+  });
+
+  router.get('/api/sources/ais/:hostname/:port', async ctx => {
+    const { hostname, port } = ctx.params;
+    const updates = connections.getAISData(hostname, port);
+    if (!updates) {
+      ctx.status = 404;
+    }
+    ctx.body = {
+      updates,
+    };
+  });
+
+  router.post('/api/sources/ais/:hostname/:port', async ctx => {
+    const { hostname, port } = ctx.params;
+    const updates = connections.getAISData(hostname, port);
+    if (updates) {
+      ctx.status = 409;
+      ctx.body = {
+        status: 'error',
+        error: {
+          message: 'Already connected',
+        },
+      };
+      return;
+    }
+    connections.addAISConnection(hostname, port);
+    ctx.body = {
+      status: 'ok',
+    };
   });
 
   app.use(router.routes());
