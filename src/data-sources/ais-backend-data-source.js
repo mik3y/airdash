@@ -60,7 +60,7 @@ export default class AisBackendDataSource {
   _processUpdate(update) {
     const { updates } = update;
     const updateMessage = Object.values(updates)
-      .map((v) => v["1"])
+      .map((v) => v["merged"])
       .filter(Boolean)
       .map((type1Message) => {
         return {

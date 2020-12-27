@@ -7,7 +7,7 @@ const debug = debugLibrary("airdash:ais-client");
 
 const runClient = ({ hostname, port }) => {
   const client = new AISClient(hostname, port, (message) => {
-    debug(`Got message: ${message}`);
+    debug(`Got message: ${JSON.stringify(message)}`);
   });
   client.connect();
 };

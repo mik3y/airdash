@@ -58,7 +58,9 @@ class ConnectionManager {
     }
     const vesselData = updateMap.get(key);
 
-    const messageType = `${message.type}`;
+    // Aggregate all message fields into one object name "merged".
+    // TODO(mikey): Understand the consequences of doing this better.
+    const messageType = `merged`;
     const messageData = vesselData.get(messageType) || {};
 
     for (const [key, value] of Object.entries(message)) {
