@@ -24,7 +24,7 @@ export const DataHubProvider = function ({ children }) {
   useEffect(() => {
     dataHub.start();
     return () => dataHub.stop();
-  }, []);
+  }, [dataHub]);
 
   const addDataSource = (dataSource) => {
     dataHub.addDataSource(dataSource);
