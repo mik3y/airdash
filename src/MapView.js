@@ -41,7 +41,7 @@ const MapView = (props) => {
       <MapContainer
         center={[40.7128, -74.006]}
         zoom={8}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
         style={{ height: "100vh" }}
       >
         {markers}
