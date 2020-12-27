@@ -7,10 +7,14 @@ A new/experimental web frontend for showing realtime ADS-B data.
 ```
 $ cd airdash/
 $ yarn
-$ yarn start
+$ yarn devserver
 ```
 
 ## Project Status & Goals
+
+Status: **Alpha**. Things are in rapid development and may be broken.
+
+### Goals
 
 This project is meant to be a standalone webapp for locally visualizing and exploring ADS-B and AIS telemetry data. Why another frontend? I have a few goals (besides the main goal: have fun).
 
@@ -23,4 +27,4 @@ This project is meant to be a standalone webapp for locally visualizing and expl
 
 ## Design
 
-This section covers some major design choices and components. You do not need to read this to use the project.
+This section will cover some major design choices and components. You do not need to read this to use the project.
