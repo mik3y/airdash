@@ -1,25 +1,26 @@
 import debugLibrary from "debug";
-import ReadsbProtoClient from "./readsb-proto-client";
+import AirdashApiClient from "../lib/airdash-api-client";
 
-const debug = debugLibrary("airdash:ReadsbProtoDataSource");
+const debug = debugLibrary("airdash:AisBackendDataSource");
 
 /**
  * An AirDash data source that reads from a readsb-proto HTTP service.
  */
-export default class ReadsbProtoDataSource {
-  constructor(baseUrl, config = {}, onUpdate = null, onError = null) {
-    this.baseUrl = baseUrl;
+export default class AisBackendDataSource {
+  constructor(hostname, port, config = {}, onUpdate = null, onError = null) {
+    this.hostname = hostname;
+    this.port = port;
     this.config = config;
     this.onUpdate = onUpdate;
     this.onError = onError;
-    this.client = new ReadsbProtoClient(baseUrl);
 
     this.pollInterval = Number.parseInt(config.pollInterval, 10) || 1000;
     this.poller = null;
+    this.client = new AirdashApiClient();
   }
 
   toString() {
-    return `<ReadsbProtoDataSource ${this.baseUrl}>`;
+    return `<AisBackendDataSource ${this.baseUrl}>`;
   }
 
   start() {
@@ -38,12 +39,12 @@ export default class ReadsbProtoDataSource {
   }
 
   async check() {
-    await this.client.getAircraft();
+      await this.client.addAISSource(this.hostname, this.port);
   }
 
   async _pollNow() {
     try {
-      const update = await this.client.getAircraft();
+      const update = await this.client.getAISUpdates(this.hostname, this.port);
       this._processUpdate(update);
     } catch (e) {
       this._processError(e);
@@ -53,17 +54,8 @@ export default class ReadsbProtoDataSource {
   }
 
   _processUpdate(update) {
-    debug("Aircraft update:", update);
-    const updateMessage = update.aircraft.map((aircraft) => {
-      return {
-        type: "aircraft",
-        id: aircraft.addr.toString(16).toUpperCase(),
-        vessel: aircraft,
-      };
-    });
-    if (this.onUpdate) {
-      this.onUpdate(updateMessage);
-    }
+    debug("AIS update:", update);
+    // TODO(mikey): Process the update!
   }
 
   _processError(error) {

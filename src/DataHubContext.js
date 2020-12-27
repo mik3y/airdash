@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
-import debugLibrary from "debug";
 import DataHub from "./data-sources/data-hub";
-import ReadsbProtoDataSource from "./data-sources/readsb-proto-data-source";
-
-const debug = debugLibrary("airdash:DataHubContext");
+import DataSourcesModal from "./components/data-sources-modal";
 
 const DataHubContext = React.createContext(null);
 
@@ -17,28 +14,17 @@ const DataHubContext = React.createContext(null);
 export const DataHubProvider = function ({ children }) {
   const [vessels, setVessels] = useState(new Map());
   const [showAdder, setShowAdder] = useState(true);
-  const [dataHub, setDataHub] = useState(null);
 
   const onDataHubChange = ({ vessels: updatedVessels }) => {
     setVessels(new Map(updatedVessels));
   };
 
-  useEffect(() => {
-    const newHub = new DataHub(onDataHubChange);
-    setDataHub(newHub);
-    newHub.start();
-    return () => newHub.stop();
-  }, []);
+  const [dataHub] = useState(new DataHub(onDataHubChange));
 
   useEffect(() => {
-    if (!dataHub) {
-      return;
-    }
-    debug("Adding default data source to data hub");
-    dataHub.addDataSource(
-      new ReadsbProtoDataSource("http://discopi.local:8080")
-    );
-  }, [dataHub]);
+    dataHub.start();
+    return () => dataHub.stop();
+  }, []);
 
   const addDataSource = (dataSource) => {
     dataHub.addDataSource(dataSource);
@@ -52,6 +38,10 @@ export const DataHubProvider = function ({ children }) {
     return dataHub.dataSources;
   };
 
+  const showDataSourceAdder = () => {
+    setShowAdder(true);
+  }
+
   return (
     <DataHubContext.Provider
       value={{
@@ -59,9 +49,10 @@ export const DataHubProvider = function ({ children }) {
         removeDataSource,
         getDataSources,
         vessels,
+        showDataSourceAdder,
       }}
     >
-      <AddDataSourceModal show={showAdder} onHide={() => setShowAdder(false)} />
+      <DataSourcesModal show={showAdder} onHide={() => setShowAdder(false)} />
       {children}
     </DataHubContext.Provider>
   );

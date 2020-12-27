@@ -1,7 +1,9 @@
 import "./App.scss";
 import MapView from "./MapView";
 import AircraftTable from "./AircraftTable";
+import DataSourcesTable from "./components/data-sources-table";
 import { DataHubProvider } from "./DataHubContext";
+import { Accordion, Card } from "react-bootstrap";
 
 function App() {
   return (
@@ -13,7 +15,28 @@ function App() {
           </div>
           <div className="column">
             <h3>AirDash!</h3>
-            <AircraftTable />
+            <Accordion defaultActiveKey="sources">
+              <Card>
+                <Accordion.Toggle as={Card.Header} eventKey="sources">
+                  Data Sources
+                </Accordion.Toggle>
+                <Accordion.Collapse eventKey="sources">
+                  <Card.Body>
+                    <DataSourcesTable />
+                  </Card.Body>
+                </Accordion.Collapse>
+              </Card>
+              <Card>
+                <Accordion.Toggle as={Card.Header} eventKey="aircraft">
+                  Aircraft
+                </Accordion.Toggle>
+                <Accordion.Collapse eventKey="aircraft">
+                  <Card.Body>
+                    <AircraftTable />
+                  </Card.Body>
+                </Accordion.Collapse>
+              </Card>
+            </Accordion>
           </div>
         </div>
       </div>
