@@ -1,11 +1,11 @@
 import "./App.scss";
 import MapView from "./MapView";
 import AircraftTable from "./AircraftTable";
-import { ReadsbProvider } from "./ReadsbContext";
+import { DataHubProvider } from "./DataHubContext";
 
 function App() {
   return (
-    <ReadsbProvider>
+    <DataHubProvider>
       <div className="App">
         <div className="columns is-gapless">
           <div className="column is-three-quarters">
@@ -17,7 +17,7 @@ function App() {
           </div>
         </div>
       </div>
-    </ReadsbProvider>
+    </DataHubProvider>
   );
 }
 

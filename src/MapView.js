@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "./MapView.scss";
 
-import ReadsbContext from "./ReadsbContext";
+import DataHubContext from "./DataHubContext";
 import PlaneIcon from "./PlaneIcon";
 import L from "leaflet";
 
@@ -15,7 +15,10 @@ L.Icon.Default.mergeOptions({
 });
 
 const MapView = (props) => {
-  const { aircraft } = useContext(ReadsbContext);
+  const { vessels } = useContext(DataHubContext);
+  const aircraft = Array.from(vessels.values())
+    .filter((v) => v.type === "aircraft")
+    .map((v) => v.vessel);
 
   const markers = aircraft.map((a) => {
     return (

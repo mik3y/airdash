@@ -1,5 +1,7 @@
-import ReadsbProto from "./readsb.proto";
-import { load as loadProto } from "protobufjs";
+/**
+ * HTTP API client for a `readsb-proto` backend.
+ */
+import ReadsbProto from "../proto/readsb.proto";
 import { default as axios } from 'axios';
 
 export default class ReadsbClient {
