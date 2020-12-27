@@ -43,9 +43,17 @@
     "jest-circus": "26.6.0",
     "jest-resolve": "26.6.0",
     "jest-watch-typeahead": "0.6.1",
+    "koa": "^2.13.0",
+    "koa-mount": "^4.0.0",
+    "koa-router": "^10.0.0",
+    "koa-static": "^5.0.0",
+    "koa-views": "^7.0.0",
+    "koa-webpack": "^6.0.0",
+    "koa2-winston": "^3.1.1",
     "leaflet": "^1.7.1",
     "mini-css-extract-plugin": "0.11.3",
     "node-sass": "4.14.1",
+    "nunjucks": "^3.2.2",
     "optimize-css-assets-webpack-plugin": "5.0.4",
     "pnp-webpack-plugin": "1.6.4",
     "postcss-flexbugs-fixes": "4.2.1",
@@ -74,12 +82,15 @@
     "webpack": "4.44.2",
     "webpack-dev-server": "3.11.0",
     "webpack-manifest-plugin": "2.2.0",
+    "winston": "^3.3.3",
     "workbox-webpack-plugin": "5.1.4"
   },
   "scripts": {
-    "start": "node scripts/start.js",
+    "start": "WEBPACK_TARGET=prod node server/server.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "test": "node scripts/test.js",
+    "build-prod": "WEBPACK_TARGET=prod webpack --config webpack/config.js --progress --colors",
+    "devserver": "WEBPACK_TARGET=local NODE_ENV=development node devserver.js"
   },
   "eslintConfig": {
     "extends": [
