@@ -42,6 +42,14 @@ export const DataHubProvider = function ({ children }) {
     setShowAdder(true);
   }
 
+  const aircraft = Array.from(vessels.values())
+    .filter((v) => v.type === "aircraft")
+    .map((v) => v.vessel);
+
+  const boats = Array.from(vessels.values())
+    .filter((v) => v.type === "vessel")
+    .map((v) => v.vessel);
+
   return (
     <DataHubContext.Provider
       value={{
@@ -49,6 +57,8 @@ export const DataHubProvider = function ({ children }) {
         removeDataSource,
         getDataSources,
         vessels,
+        aircraft,
+        boats,
         showDataSourceAdder,
       }}
     >

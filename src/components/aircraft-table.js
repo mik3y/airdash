@@ -1,14 +1,11 @@
 import React, { useContext } from "react";
-import PropTypes from "prop-types";
-import DataHubContext from "./DataHubContext";
+import DataHubContext from "../DataHubContext";
+import { Table } from "react-bootstrap";
 
-import "./AircraftTable.scss";
+import "./aircraft-table.scss";
 
 const AircraftTable = (props) => {
-  const { vessels } = useContext(DataHubContext);
-  const aircraft = Array.from(vessels.values())
-    .filter((v) => v.type === "aircraft")
-    .map((v) => v.vessel);
+  const { aircraft } = useContext(DataHubContext);
 
   if (!aircraft.length) {
     return null;
@@ -31,7 +28,7 @@ const AircraftTable = (props) => {
 
   return (
     <div className="table-container aircraft-table">
-      <table className="table">
+      <Table striped hover size="sm">
         <thead>
           <tr>
             <th>ICAO</th>
@@ -43,7 +40,7 @@ const AircraftTable = (props) => {
           </tr>
         </thead>
         <tbody>{rows}</tbody>
-      </table>
+      </Table>
     </div>
   );
 };
