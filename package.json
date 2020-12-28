@@ -55,7 +55,6 @@
     "leaflet": "^1.7.1",
     "mini-css-extract-plugin": "0.11.3",
     "node-sass": "4.14.1",
-    "nunjucks": "^3.2.2",
     "optimize-css-assets-webpack-plugin": "5.0.4",
     "pnp-webpack-plugin": "1.6.4",
     "postcss-flexbugs-fixes": "4.2.1",
@@ -92,7 +91,7 @@
     "start": "WEBPACK_TARGET=prod node server/server.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "build-prod": "WEBPACK_TARGET=prod webpack --config webpack/config.js --progress --colors",
+    "build-prod": "WEBPACK_TARGET=prod NODE_ENV=production webpack --config config/webpack.config.js --progress",
     "devserver": "WEBPACK_TARGET=local NODE_ENV=development node devserver.js"
   },
   "eslintConfig": {
@@ -171,6 +170,7 @@
     ]
   },
   "devDependencies": {
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.5",
+    "webpack-cli": "^4.3.0"
   }
 }
