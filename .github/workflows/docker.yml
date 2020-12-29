@@ -25,7 +25,8 @@ jobs:
             echo ::set-output name=tag_name::${TAG}
             echo ::set-output name=version::${TAG%-*}
           else
-            echo ::set-output name=version::snapshot
+            echo ::set-output name=tag_name::snapshot
+            echo ::set-output name=version::git-${GITHUB_SHA::8}
           fi
           echo ::set-output name=build_date::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
       -
@@ -53,7 +54,7 @@ jobs:
             --build-arg "BUILD_DATE=${{ steps.prepare.outputs.build_date }}" \
             --build-arg "GIT_SHORT_SHA=${GITHUB_SHA::8}" \
             --build-arg "VERSION=${{ steps.prepare.outputs.version }}" \
-            --tag "mik3y/airdash:${{ steps.prepare.outputs.version }}" \
+            --tag "mik3y/airdash:${{ steps.prepare.outputs.tag_name }}" \
             --tag "mik3y/airdash:latest" \
             .
       -
@@ -78,6 +79,6 @@ jobs:
             --build-arg "BUILD_DATE=${{ steps.prepare.outputs.build_date }}" \
             --build-arg "GIT_SHORT_SHA=${GITHUB_SHA::8}" \
             --build-arg "VERSION=${{ steps.prepare.outputs.version }}" \
-            --tag "mik3y/airdash:${{ steps.prepare.outputs.version }}" \
+            --tag "mik3y/airdash:${{ steps.prepare.outputs.tag_name }}" \
             --tag "mik3y/airdash:latest" \
             .
