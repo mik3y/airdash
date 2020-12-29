@@ -7,7 +7,11 @@ A new/experimental web frontend for showing realtime ADS-B (airplane) and AIS (s
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
+- [Screenshots](#screenshots)
 - [Quickstart](#quickstart)
+  - [Run directly from source](#run-directly-from-source)
+  - [Run from Docker (using official builds)](#run-from-docker-using-official-builds)
+  - [Build and run from Docker](#build-and-run-from-docker)
 - [Project Status & Goals](#project-status--goals)
   - [Goals](#goals)
 - [Supported Data Sources](#supported-data-sources)
@@ -23,23 +27,41 @@ A new/experimental web frontend for showing realtime ADS-B (airplane) and AIS (s
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## Screenshots
+
+Planes |  Ships
+:-------------------------:|:-------------------------:
+![Planes overview](https://user-images.githubusercontent.com/390829/103249996-cc0b6c00-493f-11eb-91a3-c5f423d9f250.png)  |  ![Ship overview](https://user-images.githubusercontent.com/390829/103249975-bbf38c80-493f-11eb-90dc-12af4b4a0620.png)
+
 ## Quickstart
+
+Here's how you can give AirDash a spin.
+
+### Run directly from source
 
 ```
 $ cd airdash/
 $ yarn
 $ yarn devserver
 ```
+### Run from Docker (using official builds)
 
-You may also try building and running with Docker:
+Pre-built Docker images are available for x86 and ARM (Raspberry Pi):
+
+```
+$ docker run --rm -i -t -p 8888:8000 mik3y/airdash
+```
+
+When run as above, the container will expose a web service on `http://localhost:8888`.
+
+### Build and run from Docker
+
+You can build and run from Docker locally, too:
 
 ```
 $ docker build -t airdash .
 $ docker run --rm -i -t -p 8888:8000 airdash
 ```
-
-When run as above, the container will expose a web service on `http://localhost:8888`.
-
 
 ## Project Status & Goals
 
