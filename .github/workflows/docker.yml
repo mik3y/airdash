@@ -1,12 +1,10 @@
 name: Docker Build
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main    
+  workflow_run:
+    workflows: ["Yarn Build"]
+    types:
+      - completed
 
 jobs:
   build:
