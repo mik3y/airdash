@@ -4,16 +4,79 @@
  */
 const net = require("net");
 const fs = require("fs");
+const stream = require("stream");
+const split = require("split");
 const minimist = require("minimist");
-const debugLibrary = require("debug")
+const debugLibrary = require("debug");
 
 const debug = debugLibrary("airdash:fake-ais-server");
 debugLibrary.enable("airdash:*");
 
-// Wait this many millis before sending the next line.
-const SEND_INTERVAL_MILLIS = 500;
-
+// Global set of connected clients.
 const CLIENTS = new Set();
+
+// We support reading from two types of files: Plain logs
+// of NMEA data (one message per line); and a custom format
+// where each message is preceeded by a timestamp in
+// the format YYMMDDHHMMSS, followed by a comma.
+//
+// This class implements Writable stream that auto detects timestamped
+// messages, and implements a delay when it reads one.
+//
+// The main use of this "delay" facility is to replay timestamped logs
+// in a way that simulates their real-world arrival rate. We naturally
+// wouldn't want to spew a 1GB log to clients all at once...
+class DelayedSender extends stream.Writable {
+  TIMESTAMPED_MESSAGE_RE = /^(\d{12}),(.+)/;
+
+  /**
+   * 
+   * @param {function} sendFn The function to call when the next message is available
+   * @param {number} defaultDelaySeconds The default amount to delay
+   * @param {*} maxDelay The maximum amount to delay.
+   */
+  constructor(sendFn, defaultDelaySeconds = 0.5, maxDelay = 100) {
+    super();
+    this.sendFn = sendFn;
+    this.defaultDelaySeconds = defaultDelaySeconds;
+    this.maxDelay = maxDelay;
+    this.lastTimestamp = null;
+  }
+
+  _write(chunk, enc, next) {
+    let message = chunk;
+    let timestamp = this.lastTimestamp;
+    let delaySeconds = this.defaultDelaySeconds;
+    const match = this.TIMESTAMPED_MESSAGE_RE.exec(chunk);
+
+    if (match) {
+      timestamp = Number.parseInt(match[1]) || 0;
+      message = match[2];
+      delaySeconds = timestamp - this.lastTimestamp;
+      this.lastTimestamp = timestamp;
+    }
+
+    // Don't delay *too* much. I've arbitrarily decided that a default of 
+    // 100seconds is too long for our purposes (likely indicates a data bug).
+    if (delaySeconds > 0 && delaySeconds < this.maxDelay) {
+      // Send delayed.
+      setTimeout(() => {
+        try {
+          this.sendFn(message);
+        } finally {
+          next();
+        }
+      }, delaySeconds * 1000);
+    } else {
+      // Send immediate.
+      try {
+        this.sendFn(message);
+      } finally {
+        next();
+      }
+    }
+  }
+}
 
 const getSocketName = (socket) => {
   return JSON.stringify(socket.remoteAddress);
@@ -23,13 +86,41 @@ const removeClient = (socket) => {
   CLIENTS.delete(socket);
 };
 
+const sendLineToClients = (line) => {
+  for (let c of CLIENTS) {
+    try {
+      c.write(line);
+      c.write("\n");
+    } catch (e) {
+      debug(`Removing client due to error: ${e}`);
+      removeClient(c);
+    }
+  }
+};
+
+const startStreamingFromFile = (filename) => {
+  debug(`Streaming from file: ${filename}`);
+
+  const dataStream = fs
+    .createReadStream(filename)
+    .pipe(split())
+    .pipe(
+      new DelayedSender((message) => {
+        debug(`sending message: ${message}`);
+        sendLineToClients(message);
+      })
+    )
+    .on("finish", function () {
+      debug(`Reached end of file ${filename}; restarting stream`);
+      setTimeout(function () {
+        startStreamingFromFile(filename);
+      }, 0);
+    });
+  return dataStream;
+};
+
 const runServer = ({ port, dataFile }) => {
-  const dataLines = fs
-    .readFileSync(dataFile, "utf-8")
-    .split("\n")
-    .filter(Boolean);
-  const numLines = dataLines.length;
-  let currentLine = 0;
+  startStreamingFromFile(dataFile);
 
   const server = net.createServer(function (socket) {
     const socketName = getSocketName(socket);
@@ -45,22 +136,6 @@ const runServer = ({ port, dataFile }) => {
     CLIENTS.add(socket);
   });
   server.listen(port, "0.0.0.0");
-
-  const sendNextLine = () => {
-    const nextLine = dataLines[currentLine];
-    currentLine = (currentLine + 1) % numLines;
-    for (let c of CLIENTS) {
-      try {
-        c.write(nextLine);
-        c.write("\n");
-      } catch (e) {
-        debug(`Removing client due to error: ${c}`);
-        removeClient(c);
-      }
-    }
-  };
-
-  setInterval(sendNextLine, SEND_INTERVAL_MILLIS);
 };
 
 const usage = () => {
