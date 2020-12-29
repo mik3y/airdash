@@ -48,6 +48,9 @@ const processType123 = (aisMessage, output) => {
   if (aisMessage.lon) {
     output.lon = aisMessage.lon;
   }
+  if (aisMessage.navStatus !== null && aisMessage.navStatus !== 15) {
+    output.navigationalStatus = aisMessage.navStatus;
+  }
   if (aisMessage.rateOfTurn !== null) {
     // TODO(mikey): Interpret this field.
     output.rateOfTurn = aisMessage.rateOfTurn;
