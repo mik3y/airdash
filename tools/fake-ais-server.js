@@ -15,6 +15,13 @@ debugLibrary.enable("airdash:*");
 // Global set of connected clients.
 const CLIENTS = new Set();
 
+// Parse a YYMMDDHHMMSS string to a Date.
+const parseDate = (s) => {
+  return new Date(
+    s.replace(/^(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)$/, "$4:$5:$6 $2/$3/20$1")
+  );
+};
+
 // We support reading from two types of files: Plain logs
 // of NMEA data (one message per line); and a custom format
 // where each message is preceeded by a timestamp in
@@ -30,7 +37,7 @@ class DelayedSender extends stream.Writable {
   TIMESTAMPED_MESSAGE_RE = /^(\d{12}),(.+)/;
 
   /**
-   * 
+   *
    * @param {function} sendFn The function to call when the next message is available
    * @param {number} defaultDelaySeconds The default amount to delay
    * @param {*} maxDelay The maximum amount to delay.
@@ -50,13 +57,13 @@ class DelayedSender extends stream.Writable {
     const match = this.TIMESTAMPED_MESSAGE_RE.exec(chunk);
 
     if (match) {
-      timestamp = Number.parseInt(match[1]) || 0;
+      timestamp = parseDate(match[1]);
       message = match[2];
-      delaySeconds = timestamp - this.lastTimestamp;
+      delaySeconds = this.lastTimestamp ? (timestamp - this.lastTimestamp) / 1000 : 0;
       this.lastTimestamp = timestamp;
     }
 
-    // Don't delay *too* much. I've arbitrarily decided that a default of 
+    // Don't delay *too* much. I've arbitrarily decided that a default of
     // 100seconds is too long for our purposes (likely indicates a data bug).
     if (delaySeconds > 0 && delaySeconds < this.maxDelay) {
       // Send delayed.
