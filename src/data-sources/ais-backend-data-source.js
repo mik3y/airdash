@@ -1,8 +1,6 @@
 import debugLibrary from "debug";
 import AirdashApiClient from "../lib/airdash-api-client";
 
-const debug = debugLibrary("airdash:AisBackendDataSource");
-
 /**
  * An AirDash data source that reads from a readsb-proto HTTP service.
  */
