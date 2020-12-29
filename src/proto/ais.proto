@@ -1,0 +1,196 @@
+// ais.proto
+//
+// Protocol buffer definitions for the AIS protocol.
+//
+// This proto file is unique to the AirDash project. The goal of messages
+// defined here is NOT to replicate AIS exactly in protocol buffer format.
+// Rather, the goal is to create a logical representation of AIS updates
+// that *closely matches* the protocol wherever possible.
+
+syntax = "proto3";
+
+// TODO(mikey): Get this extension to work.
+extend google.protobuf.EnumValueOptions {
+    string name = 10111;
+}
+
+// Position report navigation statuses.
+//
+// Source: https://www.navcen.uscg.gov/?pageName=AISMessagesA#CommState
+//    0 = under way using engine
+//    1 = at anchor
+//    2 = not under command
+//    3 = restricted maneuverability
+//    4 = constrained by her draught
+//    5 = moored
+//    6 = aground
+//    7 = engaged in fishing
+//    8 = under way sailing
+//    9 = reserved for future amendment of navigational status for ships carrying
+//        DG, HS, or MP, or IMO hazard or pollutant category C, high speed craft (HSC)
+//   10 = reserved for future amendment of navigational status for ships carrying dangerous
+//        goods (DG), harmful substances (HS) or marine pollutants (MP), or IMO hazard or
+//        pollutant category A, wing in ground (WIG)
+//   11 = power-driven vessel towing astern (regional use)
+//   12 = power-driven vessel pushing ahead or towing alongside (regional use);
+//   13 = reserved for future use
+//   14 = AIS-SART (active), MOB-AIS, EPIRB-AIS
+//   15 = undefined = default (also used by AIS-SART, MOB-AIS and EPIRB-AIS under test)
+enum NavigationalStatus {
+    NAVIGATIONAL_STATUS_UNDERWAY_ENGINE = 0 [(name) = "underway-engine"];
+    NAVIGATIONAL_STATUS_AT_ANCHOR = 1 [(name) = "at-anchor"];
+    NAVIGATIONAL_STATUS_NOT_UNDER_COMMAND = 2 [(name) = "not-under-command"];
+    NAVIGATIONAL_STATUS_RESTRICTED_MANEUVERABILITY = 3 [(name) = "restricted-maneuverability"];
+    NAVIGATIONAL_STATUS_DRAUGHT_CONSTRAINED = 4 [(name) = "draught-constrained"];
+    NAVIGATIONAL_STATUS_MOORED = 5 [(name) = "moored"];
+    NAVIGATIONAL_STATUS_AGROUND = 6 [(name) = "aground"];
+    NAVIGATIONAL_STATUS_FISHING = 7 [(name) = "fishing"];
+    NAVIGATIONAL_STATUS_UNDERWAY_SAILING = 8 [(name) = "underway-sailing"];
+    NAVIGATIONAL_STATUS_RESERVED_9 = 9 [(name) = "reserved-9"];
+    NAVIGATIONAL_STATUS_RESERVED_10 = 10 [(name) = "reserved-10"];
+    NAVIGATIONAL_STATUS_TOWING_ASTERN = 11 [(name) = "towing-astern"];
+    NAVIGATIONAL_STATUS_PUSHING_AHEAD = 12 [(name) = "pushing-ahead"];
+    NAVIGATIONAL_STATUS_RESERVED_13 = 13 [(name) = "reserved-13"];
+    NAVIGATIONAL_STATUS_AIS_SART = 14 [(name) = "ais-sart"];
+    NAVIGATIONAL_STATUS_UNDEFINED = 15 [(name) = "undefined"];
+}
+
+// Ship types
+//
+// Source: https://www.navcen.uscg.gov/?pageName=AISMessagesA#Type%20of%20Ship
+enum ShipType {
+    SHIP_TYPE_UNKNOWN = 0 [(name) = "unknown"];
+
+    SHIP_TYPE_RESERVED_1 = 1 [(name) = "reserved-1"];
+    SHIP_TYPE_RESERVED_2 = 2 [(name) = "reserved-2"];
+    SHIP_TYPE_RESERVED_3 = 3 [(name) = "reserved-3"];
+    SHIP_TYPE_RESERVED_4 = 4 [(name) = "reserved-4"];
+    SHIP_TYPE_RESERVED_5 = 5 [(name) = "reserved-5"];
+    SHIP_TYPE_RESERVED_6 = 6 [(name) = "reserved-6"];
+    SHIP_TYPE_RESERVED_7 = 7 [(name) = "reserved-7"];
+    SHIP_TYPE_RESERVED_8 = 8 [(name) = "reserved-8"];
+    SHIP_TYPE_RESERVED_9 = 9 [(name) = "reserved-9"];
+    SHIP_TYPE_RESERVED_10 = 10 [(name) = "reserved-10"];
+    SHIP_TYPE_RESERVED_11 = 11 [(name) = "reserved-11"];
+    SHIP_TYPE_RESERVED_12 = 12 [(name) = "reserved-12"];
+    SHIP_TYPE_RESERVED_13 = 13 [(name) = "reserved-13"];
+    SHIP_TYPE_RESERVED_14 = 14 [(name) = "reserved-14"];
+    SHIP_TYPE_RESERVED_15 = 15 [(name) = "reserved-15"];
+    SHIP_TYPE_RESERVED_16 = 16 [(name) = "reserved-16"];
+    SHIP_TYPE_RESERVED_17 = 17 [(name) = "reserved-17"];
+    SHIP_TYPE_RESERVED_18 = 18 [(name) = "reserved-18"];
+    SHIP_TYPE_RESERVED_19 = 19 [(name) = "reserved-19"];
+
+    SHIP_TYPE_WING_IN_GROUND = 20 [(name) = "wig"];
+    SHIP_TYPE_WING_IN_GROUND_HAZARDOUS_A = 21 [(name) = "wig-hazardous-a"];
+    SHIP_TYPE_WING_IN_GROUND_HAZARDOUS_B = 22 [(name) = "wig-hazardous-b"];
+    SHIP_TYPE_WING_IN_GROUND_HAZARDOUS_C = 23 [(name) = "wig-hazardous-c"];
+    SHIP_TYPE_WING_IN_GROUND_HAZARDOUS_D = 24 [(name) = "wig-hazardous-d"];
+    SHIP_TYPE_WING_IN_GROUND_RESERVED_25 = 25 [(name) = "wig-reserved-25"];
+    SHIP_TYPE_WING_IN_GROUND_RESERVED_26 = 26 [(name) = "wig-reserved-26"];
+    SHIP_TYPE_WING_IN_GROUND_RESERVED_27 = 27 [(name) = "wig-reserved-27"];
+    SHIP_TYPE_WING_IN_GROUND_RESERVED_28 = 28 [(name) = "wig-reserved-28"];
+    SHIP_TYPE_WING_IN_GROUND_RESERVED_29 = 29 [(name) = "wig-reserved-29"];
+
+    SHIP_TYPE_FISHING = 30 [(name) = "fishing"];
+    SHIP_TYPE_TOWING = 31 [(name) = "towing"];
+    SHIP_TYPE_TOWING_LONG = 32 [(name) = "towing-long"];
+    SHIP_TYPE_DREDGING_OR_UNDERWATER = 33 [(name) = "dredging-underwater"];
+    SHIP_TYPE_DIVING = 34 [(name) = "diving"];
+    SHIP_TYPE_MILITARY = 35 [(name) = "military"];
+    SHIP_TYPE_SAILING = 36 [(name) = "sailing"];
+    SHIP_TYPE_PLEASURE_CRAFT = 37 [(name) = "pleasure-craft"];
+    SHIP_TYPE_RESERVED_38 = 38 [(name) = "reserved-38"];
+    SHIP_TYPE_RESERVED_39 = 39 [(name) = "reserved-39"];
+
+    SHIP_TYPE_HIGH_SPEED = 40 [(name) = "high-speed"];
+    SHIP_TYPE_HIGH_SPEED_HAZARDOUS_A = 41 [(name) = "high-speed-hazardous-a"];
+    SHIP_TYPE_HIGH_SPEED_HAZARDOUS_B = 42 [(name) = "high-speed-hazardous-b"];
+    SHIP_TYPE_HIGH_SPEED_HAZARDOUS_C = 43 [(name) = "high-speed-hazardous-c"];
+    SHIP_TYPE_HIGH_SPEED_HAZARDOUS_D = 44 [(name) = "high-speed-hazardous-d"];
+    SHIP_TYPE_HIGH_SPEED_RESERVED_45 = 45 [(name) = "high-speed-reserved-25"];
+    SHIP_TYPE_HIGH_SPEED_RESERVED_46 = 46 [(name) = "high-speed-reserved-26"];
+    SHIP_TYPE_HIGH_SPEED_RESERVED_47 = 47 [(name) = "high-speed-reserved-27"];
+    SHIP_TYPE_HIGH_SPEED_RESERVED_48 = 48 [(name) = "high-speed-reserved-28"];
+    SHIP_TYPE_HIGH_SPEED_RESERVED_49 = 49 [(name) = "high-speed-reserved-29"];
+
+    SHIP_TYPE_PILOT_VESSEL = 50 [(name) = "pilot-vessel"];
+    SHIP_TYPE_SEARCH_AND_RESCUE = 51 [(name) = "search-and-rescue"];
+    SHIP_TYPE_TUG = 52 [(name) = "tug"];
+    SHIP_TYPE_PORT_TENDER = 53 [(name) = "port-tender"];
+    SHIP_TYPE_ANTI_POLLUTION = 54 [(name) = "anti-pollution"];
+    SHIP_TYPE_LAW_ENFORCEMENT = 55 [(name) = "law-enforcement"];
+    SHIP_TYPE_SPARE_56 = 56 [(name) = "spare-56"];
+    SHIP_TYPE_SPARE_57 = 57 [(name) = "spare-57"];
+    SHIP_TYPE_MEDICAL_TRANSPORT = 58 [(name) = "medical-transport"];
+    SHIP_TYPE_NON_COMBATANT = 59 [(name) = "non-combatant"];
+
+    SHIP_TYPE_PASSENGER = 60 [(name) = "passenger"];
+    SHIP_TYPE_PASSENGER_HAZARDOUS_A = 61 [(name) = "passenger-hazardous-a"];
+    SHIP_TYPE_PASSENGER_HAZARDOUS_B = 62 [(name) = "passenger-hazardous-b"];
+    SHIP_TYPE_PASSENGER_HAZARDOUS_C = 63 [(name) = "passenger-hazardous-c"];
+    SHIP_TYPE_PASSENGER_HAZARDOUS_D = 64 [(name) = "passenger-hazardous-d"];
+    SHIP_TYPE_PASSENGER_RESERVED_65 = 65 [(name) = "passenger-reserved-65"];
+    SHIP_TYPE_PASSENGER_RESERVED_66 = 66 [(name) = "passenger-reserved-66"];
+    SHIP_TYPE_PASSENGER_RESERVED_67 = 67 [(name) = "passenger-reserved-67"];
+    SHIP_TYPE_PASSENGER_RESERVED_68 = 68 [(name) = "passenger-reserved-68"];
+    SHIP_TYPE_PASSENGER_RESERVED_69 = 69 [(name) = "passenger-reserved-69"];
+
+    SHIP_TYPE_CARGO = 70 [(name) = "cargo"];
+    SHIP_TYPE_CARGO_HAZARDOUS_A = 71 [(name) = "cargo-hazardous-a"];
+    SHIP_TYPE_CARGO_HAZARDOUS_B = 72 [(name) = "cargo-hazardous-b"];
+    SHIP_TYPE_CARGO_HAZARDOUS_C = 73 [(name) = "cargo-hazardous-c"];
+    SHIP_TYPE_CARGO_HAZARDOUS_D = 74 [(name) = "cargo-hazardous-d"];
+    SHIP_TYPE_CARGO_RESERVED_75 = 75 [(name) = "cargo-reserved-75"];
+    SHIP_TYPE_CARGO_RESERVED_76 = 76 [(name) = "cargo-reserved-76"];
+    SHIP_TYPE_CARGO_RESERVED_77 = 77 [(name) = "cargo-reserved-77"];
+    SHIP_TYPE_CARGO_RESERVED_78 = 78 [(name) = "cargo-reserved-78"];
+    SHIP_TYPE_CARGO_RESERVED_79 = 79 [(name) = "cargo-reserved-79"];
+
+    SHIP_TYPE_TANKER = 80 [(name) = "tanker"];
+    SHIP_TYPE_TANKER_HAZARDOUS_A = 81 [(name) = "tanker-hazardous-a"];
+    SHIP_TYPE_TANKER_HAZARDOUS_B = 82 [(name) = "tanker-hazardous-b"];
+    SHIP_TYPE_TANKER_HAZARDOUS_C = 83 [(name) = "tanker-hazardous-c"];
+    SHIP_TYPE_TANKER_HAZARDOUS_D = 84 [(name) = "tanker-hazardous-d"];
+    SHIP_TYPE_TANKER_RESERVED_85 = 85 [(name) = "tanker-reserved-85"];
+    SHIP_TYPE_TANKER_RESERVED_86 = 86 [(name) = "tanker-reserved-86"];
+    SHIP_TYPE_TANKER_RESERVED_87 = 87 [(name) = "tanker-reserved-87"];
+    SHIP_TYPE_TANKER_RESERVED_88 = 88 [(name) = "tanker-reserved-88"];
+    SHIP_TYPE_TANKER_RESERVED_89 = 89 [(name) = "tanker-reserved-89"];
+
+    SHIP_TYPE_OTHER = 90 [(name) = "other"];
+    SHIP_TYPE_OTHER_HAZARDOUS_A = 91 [(name) = "other-hazardous-a"];
+    SHIP_TYPE_OTHER_HAZARDOUS_B = 92 [(name) = "other-hazardous-b"];
+    SHIP_TYPE_OTHER_HAZARDOUS_C = 93 [(name) = "other-hazardous-c"];
+    SHIP_TYPE_OTHER_HAZARDOUS_D = 94 [(name) = "other-hazardous-d"];
+    SHIP_TYPE_OTHER_RESERVED_95 = 95 [(name) = "other-reserved-95"];
+    SHIP_TYPE_OTHER_RESERVED_96 = 96 [(name) = "other-reserved-96"];
+    SHIP_TYPE_OTHER_RESERVED_97 = 97 [(name) = "other-reserved-97"];
+    SHIP_TYPE_OTHER_RESERVED_98 = 98 [(name) = "other-reserved-98"];
+    SHIP_TYPE_OTHER_RESERVED_99 = 99 [(name) = "other-reserved-99"];
+}
+  
+// Combines fields of AIS messages 1, 2, 3; 5; and 18.
+message PositionReport {
+    string mmsi = 1;
+    int64 last_update_timestamp_millis = 2;
+
+    // From messages types 1, 2, and 3:
+    double lat = 3;
+    double lon = 4;
+    NavigationalStatus navigational_status = 10;
+    double rate_of_turn = 11;
+    double speed_over_ground = 12;
+    double course_over_ground = 13;
+    double heading = 14;
+    bool special_maneuver = 15;
+
+    // From message type 5:
+    uint32 imo_number = 30;
+    string call_sign = 31;
+    string name = 32;
+    ShipType ship_type = 33;
+    string eta_utc = 34;
+    double draught = 35;
+    string destination = 36;
+}

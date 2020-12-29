@@ -20,6 +20,9 @@ const MapView = (props) => {
 
   const markers = Array.from(vessels.values()).map((entry) => {
     const { type, id, vessel } = entry;
+    if (!vessel.lat || !vessel.lon) {
+      return null;
+    }
     if (type === 'aircraft') {
       return (
         <Marker
@@ -35,9 +38,6 @@ const MapView = (props) => {
         </Marker>
       );
     } else if (type === 'vessel') {
-      if (!vessel.lat || !vessel.lon) {
-        return null;
-      }
       return (
         <Marker
           key={id}
@@ -46,7 +46,8 @@ const MapView = (props) => {
         >
           <Popup>
             <div>
-              <h2>{vessel.mmsi}</h2>
+              {vessel.name && <h2>{vessel.name}</h2>}
+              <h3>{vessel.mmsi}</h3>
             </div>
           </Popup>
         </Marker>

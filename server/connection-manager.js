@@ -4,6 +4,7 @@
  */
 
 const AISClient = require("./ais-client");
+const AIS = require('./ais');
 
 const MAX_UPDATES_PER_CLIENT = 100;
 
@@ -53,26 +54,11 @@ class ConnectionManager {
       return;
     }
 
-    if (!updateMap.has(key)) {
-      updateMap.set(key, new Map());
+    const existing = updateMap.get(key);
+    const processed = AIS.protoFromMessage(message, existing);
+    if (processed) {
+      updateMap.set(key, processed);
     }
-    const vesselData = updateMap.get(key);
-
-    // Aggregate all message fields into one object name "merged".
-    // TODO(mikey): Understand the consequences of doing this better.
-    const messageType = `merged`;
-    const messageData = vesselData.get(messageType) || {};
-
-    for (const [key, value] of Object.entries(message)) {
-      if (value === null) {
-        continue;
-      }
-      messageData[key] = value;
-    }
-    messageData.lastUpdateMillis = new Date() / 1000;
-
-    vesselData.set(messageType, messageData);
-    vesselData.set('lastUpdateMillis', messageData.lastUpdateMillis);
   }
 }
 

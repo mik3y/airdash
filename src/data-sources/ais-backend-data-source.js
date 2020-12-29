@@ -60,13 +60,11 @@ export default class AisBackendDataSource {
   _processUpdate(update) {
     const { updates } = update;
     const updateMessage = Object.values(updates)
-      .map((v) => v["merged"])
-      .filter(Boolean)
-      .map((type1Message) => {
+      .map((message) => {
         return {
           type: "vessel",
-          id: `${type1Message.mmsi}`,
-          vessel: type1Message,
+          id: `${message.mmsi}`,
+          vessel: message,
         };
       });
     if (this.onUpdate) {
