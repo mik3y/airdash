@@ -9,11 +9,10 @@ A new/experimental web frontend for showing realtime ADS-B (airplane) and AIS (s
 
 - [Screenshots](#screenshots)
 - [Quickstart](#quickstart)
-  - [Configuration](#configuration)
   - [Run directly from source](#run-directly-from-source)
   - [Run from Docker (using official builds)](#run-from-docker-using-official-builds)
   - [Build and run from Docker](#build-and-run-from-docker)
-- [Configuration](#configuration-1)
+- [Configuration](#configuration)
   - [Environment variables](#environment-variables)
 - [Project Status & Goals](#project-status--goals)
   - [Goals](#goals)
