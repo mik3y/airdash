@@ -173,7 +173,6 @@ enum ShipType {
 // Combines fields of AIS messages 1, 2, 3; 5; and 18.
 message PositionReport {
     string mmsi = 1;
-    int64 last_update_timestamp_millis = 2;
 
     // From messages types 1, 2, and 3:
     double lat = 3;

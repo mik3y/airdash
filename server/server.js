@@ -1,4 +1,5 @@
 const { App, logger } = require('./app');
+const Settings = require('./settings');
 
 const getConfig = () => {
   const config = {
@@ -12,10 +13,16 @@ const getConfig = () => {
   return config;
 };
 
-logger.info('Server starting ...');
+async function main() {
+  logger.info('Server starting ...');
 
-const config = getConfig();
-logger.info(`config: ${JSON.stringify(config)}`);
+  const config = getConfig();
+  logger.info(`config: ${JSON.stringify(config)}`);
 
-const app = App({});
-app.listen(config.listenPort);
+  await Settings.load();
+
+  const app = App({});
+  app.listen(config.listenPort);
+}
+
+main();

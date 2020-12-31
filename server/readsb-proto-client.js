@@ -1,10 +1,12 @@
 /**
  * HTTP API client for a `readsb-proto` backend.
  */
-import ReadsbProto from "../proto/readsb.proto";
-import { default as axios } from 'axios';
+const protobufjs = require('protobufjs');
+const axios = require('axios');
 
-export default class ReadsbClient {
+const ReadsbProto = protobufjs.loadSync(`${__dirname}/../src/proto/readsb.proto`);
+
+class ReadsbClient {
   constructor(baseUrl) {
     this.baseUrl = baseUrl;
     this.axios = axios.create({
@@ -60,3 +62,5 @@ export default class ReadsbClient {
     return data;
   }
 }
+
+module.exports = ReadsbClient;

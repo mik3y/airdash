@@ -56,4 +56,9 @@ export default class AirdashApiClient {
     const data = await this.get(`/api/sources/ais/${hostname}/${port}`);
     return data;
   }
+
+  async getEntities() {
+    const data = await this.get(`/api/entities`);
+    return data;
+  }
 }

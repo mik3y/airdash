@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import DataHub from "./data-sources/data-hub";
-import DataSourcesModal from "./components/data-sources-modal";
 
 const DataHubContext = React.createContext(null);
 
@@ -12,11 +11,10 @@ const DataHubContext = React.createContext(null);
  * and may have multiple consumers throughout the app.
  */
 export const DataHubProvider = function ({ children }) {
-  const [vessels, setVessels] = useState(new Map());
-  const [showAdder, setShowAdder] = useState(true);
+  const [entities, setEntities] = useState({});
 
-  const onDataHubChange = ({ vessels: updatedVessels }) => {
-    setVessels(new Map(updatedVessels));
+  const onDataHubChange = (newEntities) => {
+    setEntities(newEntities);
   };
 
   const [dataHub] = useState(new DataHub(onDataHubChange));
@@ -26,43 +24,22 @@ export const DataHubProvider = function ({ children }) {
     return () => dataHub.stop();
   }, [dataHub]);
 
-  const addDataSource = (dataSource) => {
-    dataHub.addDataSource(dataSource);
-  };
+  const aircraft = Object.values(entities)
+    .filter((v) => v.type === "ADSB")
+    .map((v) => v.adsbData);
 
-  const removeDataSource = (dataSource) => {
-    dataHub.removeDataSource(dataSource);
-  };
-
-  const getDataSources = () => {
-    return dataHub.dataSources;
-  };
-
-  const showDataSourceAdder = () => {
-    setShowAdder(true);
-  }
-
-  const aircraft = Array.from(vessels.values())
-    .filter((v) => v.type === "aircraft")
-    .map((v) => v.vessel);
-
-  const boats = Array.from(vessels.values())
-    .filter((v) => v.type === "vessel")
-    .map((v) => v.vessel);
+  const boats = Object.values(entities)
+    .filter((v) => v.type === "AIS")
+    .map((v) => v.aisData);
 
   return (
     <DataHubContext.Provider
       value={{
-        addDataSource,
-        removeDataSource,
-        getDataSources,
-        vessels,
+        entities,
         aircraft,
         boats,
-        showDataSourceAdder,
       }}
     >
-      <DataSourcesModal show={showAdder} onHide={() => setShowAdder(false)} />
       {children}
     </DataHubContext.Provider>
   );

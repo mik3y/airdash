@@ -1,6 +1,15 @@
+const debugLibrary = require("debug");
+const LRU = require("lru-cache");
+const AISClient = require("./ais-client");
+
+const debug = debugLibrary("airdash:ais-data-source");
 const protobufjs = require("protobufjs");
 const AISProto = protobufjs.loadSync(`${__dirname}/../src/proto/ais.proto`);
+const AirdashProto = protobufjs.loadSync(
+  `${__dirname}/../src/proto/airdash.proto`
+);
 
+/** Takes a raw AIS message and creates/updates our PositionReport type. */
 const protoFromMessage = (aisMessage, existing = null) => {
   const { type } = aisMessage;
 
@@ -21,19 +30,19 @@ const protoFromMessage = (aisMessage, existing = null) => {
       );
       break;
     default:
-      result = existing;
       break;
   }
   if (result) {
-      result.lastUpdateTimestampMillis = (new Date()).getTime();
-      const errorMessage = AISProto.PositionReport.verify(result);
-      if (errorMessage) {
-          throw new Error(errorMessage);
-      }
+    const errorMessage = AISProto.PositionReport.verify(result);
+    if (errorMessage) {
+      throw new Error(errorMessage);
+    }
+    return result;
   }
-  return result;
+  return existing;
 };
 
+/** Implements AIS type 1, 2, and 3 message parsing for `protoFromMessage`. */
 const processType123 = (aisMessage, output) => {
   // NOTE(mikey): Many of these fields have sentinel values for "unknown". For example,
   // a heading value of 511 means "unknown". The upstream `ais-stream-decoder` takes
@@ -71,7 +80,12 @@ const processType123 = (aisMessage, output) => {
   return output;
 };
 
+/** Implements AIS type 5 message parsing for `protoFromMessage`. */
 const processType5 = (aisMessage, output) => {
+  if (aisMessage.mmsi) {
+    // TODO(mikey): Throw error if conflict?
+    output.mmsi = aisMessage.mmsi.toString();
+  }
   if (aisMessage.imo) {
     output.imoNumber = aisMessage.imo;
   }
@@ -122,6 +136,69 @@ const processType5 = (aisMessage, output) => {
   return output;
 };
 
-module.exports = {
-  protoFromMessage,
-};
+/**
+ * An AirDash data source that reads from a readsb-proto client,
+ * aggregating updates and translating them to AirDash updates.
+ */
+class AISDataSource {
+  static dataSourceType = "AIS";
+
+  constructor(url, onUpdate = null, onError = null) {
+    this.url = url;
+    this.onUpdate = onUpdate;
+    this.onError = onError;
+    this.client = new AISClient(url.hostname, url.port);
+    this.cache = new LRU({
+      max: 1000,
+      maxAge: 60 * 60 * 1000,
+    });
+  }
+
+  toString() {
+    return `<AISDataSource ${this.url} status=${this.client.status}>`;
+  }
+
+  start() {
+    if (this.poller) {
+      return;
+    }
+    this.client.connect((message) => this._processUpdate(message));
+  }
+
+  stop() {
+    this.client.disconnect();
+  }
+
+  _processUpdate(update) {
+    const { mmsi } = update;
+    if (!mmsi) {
+      return;
+    }
+    const entityStatus =
+      this.cache.get(mmsi) ||
+      AirdashProto.EntityStatus.create({
+        id: mmsi,
+        type: AirdashProto.EntityType.AIS,
+      });
+    const aisData = protoFromMessage(update, entityStatus.aisData);
+    if (!aisData) {
+      return;
+    }
+    // debug(`Updating ${mmsi}`);
+    entityStatus.aisData = aisData;
+    entityStatus.lat = aisData.lat;
+    entityStatus.lon = aisData.lon;
+    entityStatus.lastUpdatedMillis = new Date().getTime();
+    this.cache.set(mmsi, entityStatus);
+    this.onUpdate(entityStatus);
+  }
+
+  _processError(error) {
+    console.error(error);
+    if (this.onError) {
+      this.onError(error);
+    }
+  }
+}
+
+module.exports = AISDataSource;

@@ -16,38 +16,38 @@ L.Icon.Default.mergeOptions({
 });
 
 const MapView = (props) => {
-  const { vessels } = useContext(DataHubContext);
+  const { entities } = useContext(DataHubContext);
 
-  const markers = Array.from(vessels.values()).map((entry) => {
-    const { type, id, vessel } = entry;
-    if (!vessel.lat || !vessel.lon) {
+  const markers = Object.values(entities).map((entity) => {
+    const { type, id, lat, lon } = entity;
+    if (!lat || !lon) {
       return null;
     }
-    if (type === 'aircraft') {
+    if (type === 'ADSB') {
       return (
         <Marker
           key={id}
-          position={[vessel.lat, vessel.lon]}
-          icon={PlaneIcon(vessel)}
+          position={[lat, lon]}
+          icon={PlaneIcon(entity.adsbData)}
         >
           <Popup>
             <div>
-              <h2>{vessel.flight}</h2>
+              <h2>{entity.adsbData.flight}</h2>
             </div>
           </Popup>
         </Marker>
       );
-    } else if (type === 'vessel') {
+    } else if (type === 'AIS') {
       return (
         <Marker
           key={id}
-          position={[vessel.lat, vessel.lon]}
-          icon={BoatIcon(vessel)}
+          position={[lat, lon]}
+          icon={BoatIcon(entity.aisData)}
         >
           <Popup>
             <div>
-              {vessel.name && <h2>{vessel.name}</h2>}
-              <h3>{vessel.mmsi}</h3>
+              {entity.aisData.name && <h2>{entity.aisData.name}</h2>}
+              <h3>{entity.aisData.mmsi}</h3>
             </div>
           </Popup>
         </Marker>

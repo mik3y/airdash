@@ -9,18 +9,22 @@ A new/experimental web frontend for showing realtime ADS-B (airplane) and AIS (s
 
 - [Screenshots](#screenshots)
 - [Quickstart](#quickstart)
+  - [Configuration](#configuration)
   - [Run directly from source](#run-directly-from-source)
   - [Run from Docker (using official builds)](#run-from-docker-using-official-builds)
   - [Build and run from Docker](#build-and-run-from-docker)
+- [Configuration](#configuration-1)
+  - [Environment variables](#environment-variables)
 - [Project Status & Goals](#project-status--goals)
   - [Goals](#goals)
-- [Supported Data Sources](#supported-data-sources)
+  - [Supported Data Sources](#supported-data-sources)
 - [The AirDash Server](#the-airdash-server)
   - [Server responsibilities](#server-responsibilities)
   - [Server API](#server-api)
     - [Authentication](#authentication)
-    - [`POST /api/sources/ais/:hostname/:port`](#post-apisourcesaishostnameport)
-    - [`GET /api/sources/ais/:hostname/:port`](#get-apisourcesaishostnameport)
+    - [`GET /api/entities`](#get-apientities)
+    - [`GET /api/data-sources`](#get-apidata-sources)
+    - [`POST /api/data-sources`](#post-apidata-sources)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
 - [License](#license)
@@ -36,12 +40,12 @@ Planes |  Ships
 ## Quickstart
 
 Here's how you can give AirDash a spin.
-
 ### Run directly from source
 
 ```
 $ cd airdash/
 $ yarn
+$ export DATA_SOURCES=readsb-proto://localhost:8080,ais://localhost:10111
 $ yarn devserver
 ```
 ### Run from Docker (using official builds)
@@ -49,7 +53,7 @@ $ yarn devserver
 Pre-built Docker images are available for x86 and ARM (Raspberry Pi):
 
 ```
-$ docker run --rm -i -t -p 8888:8000 mik3y/airdash
+$ docker run --rm -i -t -p 8888:8000 -e DATA_SOURCES=ais://localhost:10111 mik3y/airdash
 ```
 
 When run as above, the container will expose a web service on `http://localhost:8888`.
@@ -60,8 +64,16 @@ You can build and run from Docker locally, too:
 
 ```
 $ docker build -t airdash .
-$ docker run --rm -i -t -p 8888:8000 airdash
+$ docker run --rm -i -t -p 8888:8000 -e DATA_SOURCES=ais://localhost:10111 airdash
 ```
+
+## Configuration
+
+### Environment variables
+
+* `DATA_SOURCES`: A comma-delimited list of data sources to connect to. Each should be a URI with a hostname and port component. Supported protocols:
+    * `readsb-proto://<host>:<port>`: Reads ADS-B telemetry from a [readsb-proto](https://github.com/Mictronics/readsb-protobuf) server.
+    * `ais://<host>:<port>`: Reads AIS telemtry from an AIS NMEA TCP stream.
 
 ## Project Status & Goals
 
@@ -74,14 +86,14 @@ This project is meant to be a standalone webapp for locally visualizing and expl
 
 * **Fresh take.** The leading frontends from ADS-B are tried and true. They also make design choices that, for whatever subjective reasons, I just wasn't as attracted to. I specifically wanted to build something leveraging React.
 
-* **Developer-friendly.** It's a goal that this project is straightforward to extend and improve.
+* **Developer-friendly.** It's a goal that this project is straightforward to extend and improve, and that development is decoupled from development of the underlying data sources.
 
-## Supported Data Sources
+### Supported Data Sources
 
 The app currently supports:
 
-* ADS-B data, from [readsb-proto](https://github.com/Mictronics/readsb-protobuf). It does so by connecting to that service's web address through the AirDash client-side javascript application.
-* AIS data, from any compatible NMEA TCP stream. It does so by opening a TCP socket from the AirDash server to 
+* ADS-B data, from [readsb-proto](https://github.com/Mictronics/readsb-protobuf). 
+* AIS data, from any compatible NMEA TCP stream.
 
 Currently, data sources must be registered dynamically when the app loads.
 
@@ -94,9 +106,7 @@ AirDash is mostly a rich, client-side web application (sometimes called a single
 This simple server has two responsibilities:
 
 1. Run a basic HTTP server to serve up the AirDash javascript/app at the root url (e.g. `http://localhost:8000/`).
-2. Optionally, connect to any TCP data sources, and make their data available to the web app, through a built-in API.
-
-Because modern web applications can only fetch data through HTTP/HTTPS, it's responsibility #2 that allows AirDash to read from more than just those kind of sources.
+2. Connect and listen to (or poll) data sources, aggregating their updates and making it available to the web app, through a built-in API.
 
 ### Server API
 
@@ -106,35 +116,40 @@ This section lists the API supported by the AirDash server.
 
 There is no authentication on the API. AirDash should only be used in trusted/isolated envrionments.
 
-#### `POST /api/sources/ais/:hostname/:port`
+#### `GET /api/entities`
 
-Request that the server listen to a new AIS TCP stream.
+Get all tracked entities. The frontend polls this endpoint to keep the map view up-to-date.
 
-Path parameters
-* `hostname`: The hostname or IP to connect to.
-* `port`: The port to connect to.
+Returns a map, keyed by unique entity id, with the entity data. Each entity is an object consisting of:
+* `id`: The unique entitiy ID. While this value shouldn't be interpreted or relied on for other purposes, it will generally be the `ICAO` code (ADS-B) or `MMSI` (AIS).
+* `type`: One of `"AIS"`, `"ADSB"`.
+* `lat`: The last seen latititude.
+* `lon`: The last seen longitude.
+* `lastUpdatedMillis`: The timestamp data from this entity was last recorded.
+* `adsbData`: If (and only if) `type == "ADSB"`, an object containing the detailed, aggregated ADS-B data.
+* `aisData`: If (and only if) `type == "AIS"`, an object containing the detailed, aggregated AIS data.
+
+#### `GET /api/data-sources`
+
+Lists all configured data sources.
+
+Returns: A list of data source, each an object with fields:
+* `id`: An opaque and unique string identifying the data source.
+* `type`: One of `"AIS"`, `"ADSB"`.
+
+#### `POST /api/data-sources`
+
+Dynamically add a new data source.
+
+Request fields
+* `url`: The URL of the new data source.
 
 Response codes
-* `409`: The server is already connecting/connected to this address.
-* `200`: Success, the server will now connect to this data source.
+* `400`: Invalid URL or data source already exists.
 
 Response body
 * `status`: The value `ok` when sucessful.
 
-#### `GET /api/sources/ais/:hostname/:port`
-
-Retrieve all recent data for the previously-registered datasource.
-
-Path parameters
-* `hostname`: The hostname or IP of the data source. Must match the same value given upon registration.
-* `port`: The port of the data source.
-
-Response codes
-* `404`: The server is not connected to this data source.
-* `200`: Success.
-
-Response body
-* `updates`: A map of updates. TODO. Currently changing too rapidly to be documented here, try a live server!
 
 ## Contributing
 

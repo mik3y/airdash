@@ -20,11 +20,11 @@ function Dashboard() {
           <Accordion defaultActiveKey="sources">
             <Card>
               <Accordion.Toggle as={Card.Header} eventKey="sources">
-                Data Sources
+                Settings
               </Accordion.Toggle>
               <Accordion.Collapse eventKey="sources">
                 <Card.Body>
-                  <DataSourcesTable />
+                  <em>Coming soon!</em>
                 </Card.Body>
               </Accordion.Collapse>
             </Card>
@@ -43,7 +43,7 @@ function Dashboard() {
             {boats.length > 0 && (
               <Card>
                 <Accordion.Toggle as={Card.Header} eventKey="boats">
-                  Vessels
+                  Ships
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey="boats">
                   <Card.Body>

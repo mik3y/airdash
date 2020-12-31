@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "./ais.proto";
+import "./readsb.proto";
+
+enum EntityType {
+    UNKNOWN = 0;
+    ADSB = 1;
+    AIS = 2;
+}
+
+// EntityStatus is the the main type of "update" exposed by an AirDash
+// data source. Mostly, it is a pass-through to the more specific
+// telemetry information; with common fields wrapped up top/
+message EntityStatus {
+    string id = 1;
+    EntityType type = 2;
+    double lat = 3;
+    double lon = 4;
+    int64 last_updated_millis = 5;
+    
+    AircraftMeta adsb_data = 10;
+    PositionReport ais_data = 11;
+}

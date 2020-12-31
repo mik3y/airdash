@@ -1,4 +1,5 @@
 import debugLibrary from "debug";
+import AirdashApiClient from "../lib/airdash-api-client";
 
 const debug = debugLibrary("airdash:DataHub");
 
@@ -18,75 +19,44 @@ const debug = debugLibrary("airdash:DataHub");
 export default class DataHub {
   constructor(onChange, config = {}) {
     this.onChange = onChange;
-    this.dataSources = new Set();
-    this.vessels = new Map();
-
+    
+    this.entities = {};
+    this.client = new AirdashApiClient();
+    this.poller = null;
     this.maxAgeSeconds = 30;
     this.cleanupTimer = null;
   }
 
-  addDataSource(dataSource) {
-    this.dataSources.add(dataSource);
-    dataSource.onUpdate = (update) => this._handleUpdate(dataSource, update);
-    dataSource.onError = (error) => this._handleError(dataSource, error);
-    dataSource.start();
-  }
-
-  removeDataSource(dataSource) {
-    this.dataSources.delete(dataSource);
-    dataSource.stop();
-  }
-
   start() {
-    this.startCleanupTimer();
+    if (this.poller) {
+      throw new Error('Already started');
+    }
+    this.pollOnce();
+  }
+
+  async pollOnce() {
+    try {
+      if (this.poller) {
+        clearTimeout(this.poller);
+        this.poller = null;
+      }
+      await this.refreshEntities();
+    } finally {
+      this.poller = setTimeout(() => this.pollOnce(), 1000);
+    }
   }
 
   stop() {
-    clearTimeout(this.cleanupTimer);
-  }
-
-  startCleanupTimer() {
-    this.cleanupTimer = setTimeout(() => {
-      try {
-        this._ageOldEntries();
-      } finally {
-        this.startCleanupTimer();
-      }
-    }, (this.maxAgeSeconds / 2) * 1000);
-  }
-
-  _handleUpdate(dataSource, update) {
-    update.forEach((entity) => {
-      const { type, id, vessel } = entity;
-      const entityId = `${type}:${id}`;
-      const entry = {
-        type,
-        id,
-        vessel,
-        lastUpdate: new Date(),
-      };
-      this.vessels.set(entityId, entry);
-    });
-    this.onChange({ vessels: this.vessels });
-  }
-
-  _handleError(dataSource, error) {
-    debug(`Handling error from ${dataSource}`);
-  }
-
-  _ageOldEntries() {
-    debug('Cleanup running...');
-    const minTimestamp = new Date() - this.maxAgeSeconds * 1000;
-    let updated = false;
-    this.vessels.forEach((value, key) => {
-      const entryTimestamp = value.lastUpdate * 1;
-      if (entryTimestamp < minTimestamp) {
-        this.vessels.delete(key);
-        updated = true;
-      }
-    });
-    if (updated) {
-      this.onChange({ vessels: this.vessels });
+    if (this.poller) {
+      clearTimeout(this.poller);
+      this.poller = null;
     }
   }
+
+  async refreshEntities() {
+    const result = await this.client.getEntities();
+    this.entities = result.entities;
+    this.onChange(this.entities);
+  }
+
 }

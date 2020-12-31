@@ -1,7 +1,3 @@
-/**
- * Implements an AIS client.
- */
-
 const net = require("net");
 const AisDecoder = require("ais-stream-decoder").default;
 const split = require("split");
@@ -16,11 +12,13 @@ const RECONNECT_TIMEOUT = 5000;
 
 const debug = debugLibrary("airdash:AISClient");
 
+/**
+ * A TCP client for an AIS NMEA data stream.
+ */
 class AISClient {
-  constructor(hostname, port, onMessage = null) {
+  constructor(hostname, port) {
     this.hostname = hostname;
     this.port = port;
-    this.onMessage = onMessage;
 
     this.status = STATUS_DISCONNECTED;
 
@@ -28,7 +26,7 @@ class AISClient {
     this.reconnectTimeout = null;
   }
 
-  connect() {
+  connect(onMessage) {
     if (
       this.status !== STATUS_DISCONNECTED &&
       this.status !== STATUS_RECONNECTING
@@ -59,7 +57,7 @@ class AISClient {
         .pipe(split())
         .pipe(aisDecoder)
         .on("data", (decodedMessage) => {
-          this._handleNewMessage(JSON.parse(decodedMessage));
+          onMessage(JSON.parse(decodedMessage));
         });
     });
   }

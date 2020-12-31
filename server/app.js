@@ -6,11 +6,19 @@ const mount = require("koa-mount");
 const fs = require("fs");
 const winston = require("winston");
 const koaLogger = require("koa2-winston").logger;
+const bodyParser = require('koa-bodyparser');
+const debugLibrary = require("debug");
+const debug = debugLibrary("airdash:server");
 
 const ConnectionManager = require("./connection-manager");
+const Settings = require('./settings');
 
 const ASSET_DIR = `${__dirname}/../build`;
 const STATIC_DIR = `${ASSET_DIR}/static`;
+
+class InvalidRequestError extends Error {
+  static status = 400;
+}
 
 const stackFormatter = winston.format((info, opts) => {
   if (info.stack) {
@@ -97,6 +105,7 @@ const App = ({ initialMiddleware }) => {
 
   const router = new Router();
 
+  router.use(bodyParser());
   router.use(views(ASSET_DIR));
 
   router.get('/', async ctx => {
@@ -106,34 +115,61 @@ const App = ({ initialMiddleware }) => {
   });
 
   const connections = new ConnectionManager();
+  if (Settings.dataSources) {
+    Settings.dataSources.forEach((uri) => {
+      try {
+        connections.addDataSource(uri);
+        debug(`Added data source ${uri}`)
+      } catch (e) {
+        console.error(`Error: Failed to add data source ${uri}: ${e}`);
+      }
+    });
+  }
 
-  router.get("/api/sources/ais/:hostname/:port", async (ctx) => {
-    const { hostname, port } = ctx.params;
-    const updates = connections.getAISData(hostname, port);
-    if (!updates) {
-      ctx.status = 404;
+  router.use(async (ctx, next) => {
+    try {
+      await next();
+    } catch (err) {
+      ctx.status = err.status || err.constructor.status || 500;
+      ctx.body = {
+        status: 'error',
+        error: {
+          message: err.toString(),
+        },
+      };
     }
+  });
+  
+  router.get("/api/data-sources", async (ctx) => {
+    const dataSources = connections.getDataSources();
+    const result = Object.entries(dataSources).map(([id, dataSource]) => {
+      return {
+        id,
+        type: dataSource.constructor.dataSourceType,
+      }
+    });
     ctx.body = {
-      updates: mapToObject(updates),
+      status: "ok",
+      data_sources: result,
     };
   });
 
-  router.post("/api/sources/ais/:hostname/:port", async (ctx) => {
-    const { hostname, port } = ctx.params;
-    const updates = connections.getAISData(hostname, port);
-    if (updates) {
-      ctx.status = 409;
-      ctx.body = {
-        status: "error",
-        error: {
-          message: "Already connected",
-        },
-      };
-      return;
+  router.post("/api/data-sources", async (ctx) => {
+    const { url } = ctx.request.body;
+    if (!url) {
+      throw new InvalidRequestError('Must provide `url`');
     }
-    connections.addAISConnection(hostname, port);
+    await connections.addDataSource(url);
     ctx.body = {
       status: "ok",
+    };
+  });
+
+  router.get("/api/entities", async (ctx) => {
+    const entities = Object.fromEntries(connections.entities.keys().map(k => [k, connections.entities.peek(k)]));
+    ctx.body = {
+      status: "ok",
+      entities: entities,
     };
   });
 

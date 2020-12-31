@@ -2,7 +2,6 @@ const { AIRDASH_SETTINGS } = process.env;
 const os = require("os");
 const path = require("path");
 const fs = require("fs");
-const { readFile, writeFile } = fs.promises;
 const debug = require("debug")("airdash:settings");
 
 const HOME_DIR = os.homedir();
@@ -21,17 +20,17 @@ class Settings {
 
   async load() {
     this.loadFromEnv();
-    await this.loadFromFile();
+    this.loadFromFile();
     debug(`Settings loaded: ${JSON.stringify(this.toJSON())}`);
   }
 
-  async loadFromFile() {
+  loadFromFile() {
     debug(`Loading settings from ${this.settingsFilename}`);
     if (!fs.existsSync(this.settingsFilename)) {
       debug(`Settings file ${this.settingsFilename} does not exist`);
       return;
     }
-    const data = await readFile(this.settingsFilename);
+    const data = fs.readFileSync(this.settingsFilename);
     const jsonSettings = JSON.parse(data);
     if (jsonSettings.dataSources) {
       this.dataSources = jsonSettings.dataSources;
@@ -39,17 +38,18 @@ class Settings {
   }
 
   loadFromEnv() {
+    debug('loading from env', process.env)
     const { DATA_SOURCES } = process.env;
     if (DATA_SOURCES) {
       this.dataSources = DATA_SOURCES.split(",");
     }
   }
 
-  async save() {
+  save() {
     const dirName = path.dirname(this.settingsFilename);
-    await fs.mkdirSync(dirName, { recursive: true });
+    fs.mkdirSync(dirName, { recursive: true });
     const data = this.toJSON();
-    await writeFile(this.settingsFilename, JSON.stringify(data, null, 2));
+    fs.writeFileSync(this.settingsFilename, JSON.stringify(data, null, 2));
     debug(`Settings saved to ${this.settingsFilename}`);
   }
 
@@ -61,5 +61,6 @@ class Settings {
 }
 
 const sSingleton = new Settings();
+sSingleton.load();
 
 module.exports = sSingleton;

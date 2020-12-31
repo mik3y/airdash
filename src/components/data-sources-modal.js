@@ -1,8 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Modal, Form, Button, Alert } from "react-bootstrap";
 import DataHubContext from "../DataHubContext";
-import ReadsbProtoDataSource from "../data-sources/readsb-proto-data-source";
-import AisBackendDataSource from "../data-sources/ais-backend-data-source";
 
 const TYPE_READSB = "readsb-proto";
 const TYPE_AIS = "ais-backend";
@@ -21,16 +19,16 @@ const NewDataSourceForm = ({ onAdded }) => {
     let dataSource;
     setIsAdding(true);
     try {
-      if (type === TYPE_READSB) {
-        dataSource = new ReadsbProtoDataSource(`http://${hostname}:${port}`);
-      } else if (type === TYPE_AIS) {
-        dataSource = new AisBackendDataSource(hostname, port);
-      } else {
-        throw new Error("Unknown type");
-      }
-      await dataSource.check();
-      addDataSource(dataSource);
-      onAdded(dataSource);
+      // if (type === TYPE_READSB) {
+      //   dataSource = new ReadsbProtoDataSource(`http://${hostname}:${port}`);
+      // } else if (type === TYPE_AIS) {
+      //   dataSource = new AisBackendDataSource(hostname, port);
+      // } else {
+      //   throw new Error("Unknown type");
+      // }
+      // await dataSource.check();
+      // addDataSource(dataSource);
+      // onAdded(dataSource);
     } catch (error) {
       setAddingError(error);
     } finally {
