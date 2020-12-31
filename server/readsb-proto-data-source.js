@@ -21,7 +21,7 @@ class ReadsbProtoDataSource {
     );
     this.cache = new LRU({
       max: 1000,
-      maxAge: 60 * 60 * 1000,
+      maxAge: 60 * 1000,
     });
 
     this.pollInterval = 1000;
