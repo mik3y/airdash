@@ -5,10 +5,12 @@ import {
   Marker,
   Popup,
   LayersControl,
+  useMapEvent,
 } from "react-leaflet";
 import "./MapView.scss";
 
 import DataHubContext from "./DataHubContext";
+import PreferencesContext from "./PreferencesContext";
 import PlaneIcon from "./PlaneIcon";
 import BoatIcon from "./BoatIcon";
 import L from "leaflet";
@@ -21,8 +23,28 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
 });
 
+/** Listens to Leaflet events and connects them to our own components. */
+const MapStateHandler = () => {
+  const { setMapCenter, setZoomLevel } = useContext(PreferencesContext);
+
+  useMapEvent("zoomend", (e) => {
+    const map = e.target;
+    const zoomLevel = map.getZoom();
+    setZoomLevel(zoomLevel);
+  });
+
+  useMapEvent("moveend", (e) => {
+    const map = e.target;
+    const center = map.getCenter();
+    setMapCenter([center.lat, center.lng]);
+  });
+
+  return null;
+};
+
 const MapView = (props) => {
   const { entities } = useContext(DataHubContext);
+  const { mapCenter, zoomLevel } = useContext(PreferencesContext);
 
   const markers = Object.values(entities)
     .map((entity) => {
@@ -67,11 +89,12 @@ const MapView = (props) => {
   return (
     <div>
       <MapContainer
-        center={[40.7128, -74.006]}
-        zoom={8}
+        center={mapCenter}
+        zoom={zoomLevel}
         scrollWheelZoom={true}
         style={{ height: "100vh" }}
       >
+        <MapStateHandler />
         {markers}
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
