@@ -150,6 +150,25 @@ Response body
 * `status`: The value `ok` when sucessful.
 
 
+## Developer instructions
+
+These notes are for folks interested in modifying or extending airdash.
+
+### Prerequisites
+
+You'll need a recent version of nodejs, and the tool yarn. Once you have node installed, install yarn:
+
+```
+npm install -g yarn
+```
+
+### Using the `devserver`
+
+When you run the server using `yarn devserver` instead of `yarn start`, the server runs in development mode. This enables two features:
+
+* Frontend code changes (code in `src/`) are automatically built and hot reloaded in your browser.
+* Backend code changes (code in `server/`) cause the devserver to reload.
+
 ## Contributing
 
 Pull requests, ideas, and improvements are welcome. Please open an issue in the issue tracker to get in touch!
