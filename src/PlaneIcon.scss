@@ -12,6 +12,9 @@ $color-altitude-10: lighten($color-altitude-8, 20);
 $color-altitude-11: lighten($color-altitude-8, 30);
 
 .plane-icon {
+  position: absolute;
+  right: -100%;
+  top: -100%;
   path {
     stroke: #222222;
     stroke-width: 8px;

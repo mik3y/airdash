@@ -41,7 +41,7 @@ const PlaneIcon = (aircraft) => {
   const altitudeClass = `altitude-${getAltitudeLevel(altitude)}`;
   const icon = L.divIcon({
     className: "custom-icon",
-    popupAnchor: [16, -16],
+    popupAnchor: [0, -16],
     html: ReactDOMServer.renderToString((
         <div key={`icon-${aircraft.addr}`} className="plane-icon">
             <Plane style={style} className={altitudeClass} />

@@ -12,6 +12,7 @@ const DataHubContext = React.createContext(null);
  */
 export const DataHubProvider = function ({ children }) {
   const [entities, setEntities] = useState({});
+  const [activeEntityId, setActiveEntityId] = useState(null);
 
   const onDataHubChange = (newEntities) => {
     setEntities(newEntities);
@@ -38,6 +39,8 @@ export const DataHubProvider = function ({ children }) {
         entities,
         aircraft,
         boats,
+        activeEntityId,
+        setActiveEntityId,
       }}
     >
       {children}

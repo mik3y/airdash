@@ -5,6 +5,7 @@ import {
   Marker,
   Popup,
   LayersControl,
+  Polyline,
   useMapEvent,
 } from "react-leaflet";
 import "./MapView.scss";
@@ -43,8 +44,38 @@ const MapStateHandler = () => {
   return null;
 };
 
+const TrackLine = ({ entity }) => {
+  const { id, track } = entity;
+  if (!track || track.length < 2) {
+    return null;
+  }
+  let lastPosition = null;
+  let segmentNumber = 0;
+  const segments = track.map((position) => {
+    if (!lastPosition) {
+      lastPosition = position;
+      return null;
+    }
+    const result = (
+      <Polyline
+        key={`${id}-${segmentNumber++}`}
+        positions={[
+          [lastPosition.lat, lastPosition.lon],
+          [position.lat, position.lon],
+        ]}
+        color={"red"}
+      />
+    );
+    lastPosition = position;
+    return result;
+  });
+  return segments;
+};
+
 const MapView = (props) => {
-  const { entities } = useContext(DataHubContext);
+  const { entities, activeEntityId, setActiveEntityId } = useContext(
+    DataHubContext
+  );
   const { mapCenter, zoomLevel } = useContext(PreferencesContext);
 
   const markers = Object.values(entities)
@@ -53,32 +84,37 @@ const MapView = (props) => {
       if (!lat || !lon) {
         return null;
       }
+      let icon;
       if (type === "ADSB") {
-        return (
-          <Marker
-            key={id}
-            position={[lat, lon]}
-            icon={PlaneIcon(entity.adsbData)}
-          >
-            <Popup>
-              <EntityPopup entity={entity} />
-            </Popup>
-          </Marker>
-        );
+        icon = PlaneIcon(entity.adsbData);
       } else if (type === "AIS") {
-        return (
+        icon = BoatIcon(entity.aisData);
+      } else {
+        return null;
+      }
+      return (
+        <React.Fragment key={id}>
           <Marker
-            key={id}
             position={[lat, lon]}
-            icon={BoatIcon(entity.aisData)}
+            icon={icon}
+            eventHandlers={{
+              popupopen: (e) => {
+                setActiveEntityId(id);
+              },
+              popupclose: (e) => {
+                if (activeEntityId === id) {
+                  setActiveEntityId(null);
+                }
+              },
+            }}
           >
             <Popup>
               <EntityPopup entity={entity} />
             </Popup>
           </Marker>
-        );
-      }
-      return null;
+          {id === activeEntityId && <TrackLine entity={entity} />}
+        </React.Fragment>
+      );
     })
     .filter(Boolean);
 
