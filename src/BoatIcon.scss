@@ -1,0 +1,35 @@
+$color-ship-default: #707070;
+$color-ship-moving: #178b3a;
+$color-ship-anchored: #ee7f00;
+$color-ship-moored: #c2c505;
+$color-ship-sart: #fc2c07;
+
+.boat-icon {
+  position: absolute;
+  right: -100%;
+  top: -100%;
+  path {
+    stroke: #222222;
+    stroke-width: 8px;
+  }
+  .is-moving {
+    path {
+      fill: $color-ship-moving;
+    }
+  }
+  .is-anchored {
+    path {
+      fill: $color-ship-anchored;
+    }
+  }
+  .is-moored {
+    path {
+      fill: $color-ship-moored;
+    }
+  }
+  .is-sart {
+    path {
+      fill: $color-ship-sart;
+    }
+  }
+}
