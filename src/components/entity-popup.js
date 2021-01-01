@@ -33,6 +33,9 @@ const AircraftDetail = ({ entity }) => {
           </tr>
         </tbody>
       </table>
+      <p className="text-muted">
+        <a onClick={() => console.log(entity)}>Click here to dump raw data to console</a>.
+      </p>
     </div>
   );
 };
@@ -85,13 +88,15 @@ const VesselDetail = ({ entity }) => {
           </tr>
         </tbody>
       </table>
+      <p className="text-muted">
+        Click <a onClick={() => console.log(entity)}>here</a> to dump raw data to console.
+      </p>
     </div>
   );
 };
 
 /** Show entity detail. Meant to be rendered in the map popup. */
 const EntityPopup = ({ entity }) => {
-  console.log(entity);
   switch (entity.type) {
     case "ADSB":
       return <AircraftDetail entity={entity} />;
