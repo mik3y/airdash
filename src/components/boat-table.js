@@ -4,6 +4,16 @@ import { Table } from "react-bootstrap";
 
 import "./boat-table.scss";
 
+const boatSort = (a, b) => {
+  if (a.mmsi === b.mmsi) {
+    return 0;
+  }
+  if (b.mmsi > a.mmsi) {
+    return -1;
+  }
+  return 1;
+};
+
 const BoatTable = (props) => {
   const { boats } = useContext(DataHubContext);
 
@@ -11,7 +21,7 @@ const BoatTable = (props) => {
     return null;
   }
 
-  const rows = boats.map((b) => {
+  const rows = boats.sort(boatSort).map((b) => {
     return (
       <tr key={b.mmsi}>
         <td>{b.mmsi}</td>

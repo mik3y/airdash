@@ -34,10 +34,52 @@ const AircraftDetail = ({ entity }) => {
         </tbody>
       </table>
       <p className="text-muted">
-        <a onClick={() => console.log(entity)}>Click here to dump raw data to console</a>.
+        <a onClick={() => console.log(entity)}>
+          Click here to dump raw data to console
+        </a>
+        .
       </p>
     </div>
   );
+};
+
+const NavigationalStatus = ({ status }) => {
+  switch (status) {
+    case "NAVIGATIONAL_STATUS_UNDERWAY_ENGINE":
+      return "Underway (engine)";
+    case "NAVIGATIONAL_STATUS_AT_ANCHOR":
+      return "Anchored";
+    case "NAVIGATIONAL_STATUS_NOT_UNDER_COMMAND":
+      return "Not under command";
+    case "NAVIGATIONAL_STATUS_RESTRICTED_MANEUVERABILITY":
+      return "Restricted manueverability";
+    case "NAVIGATIONAL_STATUS_DRAUGHT_CONSTRAINED":
+      return "Draught constrained";
+    case "NAVIGATIONAL_STATUS_MOORED":
+      return "Moored";
+    case "NAVIGATIONAL_STATUS_AGROUND":
+      return "Aground";
+    case "NAVIGATIONAL_STATUS_FISHING":
+      return "Fishing";
+    case "NAVIGATIONAL_STATUS_UNDERWAY_SAILING":
+      return "Underway (sailing)";
+    case "NAVIGATIONAL_STATUS_RESERVED_9":
+      return "Reserved (9)";
+    case "NAVIGATIONAL_STATUS_RESERVED_10":
+      return "Reserved (10)";
+    case "NAVIGATIONAL_STATUS_TOWING_ASTERN":
+      return "Towing astern";
+    case "NAVIGATIONAL_STATUS_PUSHING_AHEAD":
+      return "Pushing ahead";
+    case "NAVIGATIONAL_STATUS_RESERVED_13":
+      return "Reserved (13)";
+    case "NAVIGATIONAL_STATUS_AIS_SART":
+      return "SART";
+    case "NAVIGATIONAL_STATUS_UNDEFINED":
+      return "Unknown";
+    default:
+      return <>{status}</>;
+  }
 };
 
 const VesselDetail = ({ entity }) => {
@@ -70,10 +112,14 @@ const VesselDetail = ({ entity }) => {
             <th>MMSI</th>
             <td>{aisData.mmsi}</td>
           </tr>
-          <tr>
-            <th>Status</th>
-            <td>{aisData.navigationalStatus}</td>
-          </tr>
+          {aisData.navigationalStatus && (
+            <tr>
+              <th>Status</th>
+              <td>
+                <NavigationalStatus status={aisData.navigationalStatus} />
+              </td>
+            </tr>
+          )}
           <tr>
             <th>Speed</th>
             <td>{aisData.speedOverGround}</td>
@@ -89,7 +135,8 @@ const VesselDetail = ({ entity }) => {
         </tbody>
       </table>
       <p className="text-muted">
-        Click <a onClick={() => console.log(entity)}>here</a> to dump raw data to console.
+        Click <a onClick={() => console.log(entity)}>here</a> to dump raw data
+        to console.
       </p>
     </div>
   );
