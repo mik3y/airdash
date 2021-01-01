@@ -159,6 +159,7 @@ const processType5 = (aisMessage, output) => {
  */
 class AISDataSource {
   static dataSourceType = "AIS";
+  static minimumTrackUpdateDistanceMeters = 10;
 
   constructor(url, onUpdate = null, onError = null) {
     this.url = url;

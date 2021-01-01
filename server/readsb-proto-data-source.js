@@ -12,6 +12,9 @@ const debug = debugLibrary("airdash:ReadsbProtoDataSource");
  * An AirDash data source that reads from a readsb-proto HTTP service.
  */
 class ReadsbProtoDataSource {
+  static dataSourceType = "ADSB";
+  static minimumTrackUpdateDistanceMeters = 50;
+
   constructor(url, onUpdate, onError = null) {
     this.url = url;
     this.onUpdate = onUpdate;
@@ -70,13 +73,19 @@ class ReadsbProtoDataSource {
         AirdashProto.EntityStatus.create({
           id,
           type: AirdashProto.EntityType.ADSB,
+          lat: aircraft.lat,
+          lon: aircraft.lon,
         });
-      entityStatus.lat = aircraft.lat || entityStatus.lat;
-      entityStatus.lon = aircraft.lon || entityStatus.lon;
-      entityStatus.lastUpdatedMillis = new Date().getTime();
+      const currentLat = aircraft.lat;
+      const currentLon = aircraft.lon;
+      if (currentLat === 0 && currentLon === 0 && entityStatus.lat === 0 && entityStatus.lon === 0) {
+        // Ignore updates before we have position information.
+        return;
+      }
+      entityStatus.lat = currentLat;
+      entityStatus.lon = currentLon;
       entityStatus.adsbData = aircraft;
       this.cache.set(id, entityStatus);
-      // debug("Aircraft update:", entityStatus);
       this.onUpdate(entityStatus);
     });
   }

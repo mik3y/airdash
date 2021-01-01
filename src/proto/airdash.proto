@@ -21,4 +21,13 @@ message EntityStatus {
     
     AircraftMeta adsb_data = 10;
     PositionReport ais_data = 11;
+
+    repeated TrackPosition track = 16;
+}
+
+message TrackPosition {
+    double lat = 1;
+    double lon = 2;
+    double elevation = 3;
+    int64 timestamp_millis = 4;
 }

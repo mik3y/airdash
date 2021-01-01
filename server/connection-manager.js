@@ -8,9 +8,14 @@ const ReadsbProtoDataSource = require("./readsb-proto-data-source");
 const LRU = require("lru-cache");
 const debugLibrary = require("debug");
 const debug = debugLibrary("airdash:connection-manager");
+const geolib = require('geolib');
 
 const PROTOCOL_AIS = "ais:";
 const PROTOCOL_READSB_PROTO = "readsb-proto:";
+
+// Maximum number of points per track.
+// TODO(mikey): Should be smarter.
+const MAX_TRACK_POINTS = 100;
 
 class ConnectionManagerError extends Error {
   static status = 500;
@@ -93,7 +98,43 @@ class ConnectionManager {
   _onDataSourceUpdate(dataSource, connectionId, update) {
     // debug(`Updating entity ${connectionId}: ${update}`);
     const cacheKey = `${connectionId}:${update.id}`;
+    update.lastUpdatedMillis = new Date().getTime();
+
+    // TODO(mikey): Properly merge updates.
+    const existing = this.entities.peek(cacheKey);
+    if (existing && existing.track && existing.track.length > 1) {
+      update.track = existing.track;
+    }
+    this._updateTrack(update, dataSource.constructor.minimumTrackUpdateDistanceMeters);
+
     this.entities.set(cacheKey, update);
+  }
+
+  _updateTrack(entityStatus, minDistanceMeters) {
+    if (!entityStatus.track) {
+      entityStatus.track = [];
+    }
+    const [lastTrackPosition] = entityStatus.track.slice(-1);
+    let shouldAddNewPoint = false;
+    if (!lastTrackPosition) {
+      shouldAddNewPoint = true;
+    } else {
+      const distance = geolib.getDistance(
+        { latitude: lastTrackPosition.lat, longitude: lastTrackPosition.lon },
+        { latitude: entityStatus.lat, longitude: entityStatus.lon }
+      );
+      shouldAddNewPoint = distance >= minDistanceMeters;
+    }
+
+    if (shouldAddNewPoint) {
+      entityStatus.track.push({
+        // TODO(mikey): Add elevation.
+        timestampMillis: entityStatus.lastUpdatedMillis,
+        lat: entityStatus.lat,
+        lon: entityStatus.lon,
+      });
+      entityStatus.track = entityStatus.track.slice(-1 * MAX_TRACK_POINTS);
+    }
   }
 
   _onDataSourceError(dataSource, connectionId, error) {
