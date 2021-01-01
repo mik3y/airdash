@@ -8,7 +8,7 @@ const STYLE = {
 };
 
 const BoatIcon = (vessel) => {
-  const rotation = vessel.heading || 0;
+  const rotation = vessel.courseOverGround || 0;
   const style = {
     ...STYLE,
     transform: `rotate(${rotation}deg)`,
