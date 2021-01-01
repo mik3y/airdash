@@ -16,6 +16,7 @@ class Settings {
       AIRDASH_SETTINGS || "~/.airdash/settings.json"
     );
     this.dataSources = [];
+    this.debug;
   }
 
   async load() {
@@ -35,13 +36,19 @@ class Settings {
     if (jsonSettings.dataSources) {
       this.dataSources = jsonSettings.dataSources;
     }
+    if (jsonSettings.debug) {
+      this.debug = jsonSettings.debug === true ;
+    }
   }
 
   loadFromEnv() {
     debug('loading from env', process.env)
-    const { DATA_SOURCES } = process.env;
+    const { DATA_SOURCES, DEBUG } = process.env;
     if (DATA_SOURCES) {
       this.dataSources = DATA_SOURCES.split(",");
+    }
+    if (DEBUG === '1' || DEBUG === 'y') {
+      this.debug = true;
     }
   }
 
@@ -56,6 +63,7 @@ class Settings {
   toJSON() {
     return {
       dataSources: this.dataSources,
+      debug: this.debug,
     };
   }
 }

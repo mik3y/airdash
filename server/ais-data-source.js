@@ -8,6 +8,7 @@ const AISProto = protobufjs.loadSync(`${__dirname}/../src/proto/ais.proto`);
 const AirdashProto = protobufjs.loadSync(
   `${__dirname}/../src/proto/airdash.proto`
 );
+const Settings = require('./settings');
 
 /** Takes a raw AIS message and creates/updates our PositionReport type. */
 const protoFromMessage = (aisMessage, existing = null) => {
@@ -42,6 +43,19 @@ const protoFromMessage = (aisMessage, existing = null) => {
   return existing;
 };
 
+/** Returns true iff the numeric value is a ship type we recognize (exists in our enum). */
+const isValidShipType = (v) => {
+  return !!AirdashProto.nested.ShipType.valuesById[v];
+};
+
+/** Returns true iff the numeric value is a navigational status we recognize. */
+const isValidNavigationalStatus = (v) => {
+  return (
+    !!AirdashProto.nested.NavigationalStatus.valuesById[v] &&
+    v !== AirdashProto.NavigationalStatus.NAVIGATIONAL_STATUS_UNDEFINED
+  );
+};
+
 /** Implements AIS type 1, 2, and 3 message parsing for `protoFromMessage`. */
 const processType123 = (aisMessage, output) => {
   // NOTE(mikey): Many of these fields have sentinel values for "unknown". For example,
@@ -57,8 +71,9 @@ const processType123 = (aisMessage, output) => {
   if (aisMessage.lon) {
     output.lon = aisMessage.lon;
   }
-  if (aisMessage.navStatus !== null && aisMessage.navStatus !== 15) {
-    output.navigationalStatus = aisMessage.navStatus;
+  const navStatus = Number.parseInt(aisMessage.navStatus, 10);
+  if (isValidNavigationalStatus(navStatus)) {
+    output.navigationalStatus = navStatus;
   }
   if (aisMessage.rateOfTurn !== null) {
     // TODO(mikey): Interpret this field.
@@ -101,8 +116,10 @@ const processType5 = (aisMessage, output) => {
       output.name = cleanedName;
     }
   }
-  if (aisMessage.typeAndCargo) {
-    output.shipType = aisMessage.typeAndCargo;
+
+  const shipType = aisMessage.typeAndCargo;
+  if (isValidShipType(shipType)) {
+    output.shipType = shipType;
   }
   if (
     aisMessage.etaMonth !== null &&
@@ -162,7 +179,20 @@ class AISDataSource {
     if (this.poller) {
       return;
     }
-    this.client.connect((message) => this._processUpdate(message));
+    this.client.connect((message) => {
+      try {
+        this._processUpdate(message);
+      } catch (e) {
+        // Occasionally a malformed message (or our own bug) might
+        // crash the message processor. If we are in debug mode, allow it to
+        // crash things so a developer can attend to it. Otherwise, scold in
+        // logs and keep charging on.
+        console.error("Error processing update:", JSON.stringify(message));
+        if (Settings.debug) {
+          throw e;
+        }
+      }
+    });
   }
 
   stop() {
