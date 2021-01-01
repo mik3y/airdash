@@ -24,6 +24,9 @@ A new/experimental web frontend for showing realtime ADS-B (airplane) and AIS (s
     - [`GET /api/entities`](#get-apientities)
     - [`GET /api/data-sources`](#get-apidata-sources)
     - [`POST /api/data-sources`](#post-apidata-sources)
+- [Developer instructions](#developer-instructions)
+  - [Prerequisites](#prerequisites)
+  - [Using the `devserver`](#using-the-devserver)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
 - [License](#license)
@@ -93,8 +96,6 @@ The app currently supports:
 
 * ADS-B data, from [readsb-proto](https://github.com/Mictronics/readsb-protobuf). 
 * AIS data, from any compatible NMEA TCP stream.
-
-Currently, data sources must be registered dynamically when the app loads.
 
 ## The AirDash Server
 
