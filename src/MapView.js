@@ -13,6 +13,7 @@ import DataHubContext from "./DataHubContext";
 import PreferencesContext from "./PreferencesContext";
 import PlaneIcon from "./PlaneIcon";
 import BoatIcon from "./BoatIcon";
+import EntityPopup from "./components/entity-popup";
 import L from "leaflet";
 
 // https://github.com/Leaflet/Leaflet/issues/4968#issuecomment-483402699
@@ -60,9 +61,7 @@ const MapView = (props) => {
             icon={PlaneIcon(entity.adsbData)}
           >
             <Popup>
-              <div>
-                <h2>{entity.adsbData.flight}</h2>
-              </div>
+              <EntityPopup entity={entity} />
             </Popup>
           </Marker>
         );
@@ -74,10 +73,7 @@ const MapView = (props) => {
             icon={BoatIcon(entity.aisData)}
           >
             <Popup>
-              <div>
-                {entity.aisData.name && <h2>{entity.aisData.name}</h2>}
-                <h3>{entity.aisData.mmsi}</h3>
-              </div>
+              <EntityPopup entity={entity} />
             </Popup>
           </Marker>
         );
