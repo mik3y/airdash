@@ -80,10 +80,10 @@ const processType123 = (aisMessage, output) => {
     output.rateOfTurn = aisMessage.rateOfTurn;
   }
   if (aisMessage.speedOverGround !== null) {
-    output.speedOverGround = aisMessage.speedOverGround / 10;
+    output.speedOverGround = aisMessage.speedOverGround;
   }
   if (aisMessage.courseOverGround !== null) {
-    output.courseOverGround = aisMessage.courseOverGround / 10;
+    output.courseOverGround = aisMessage.courseOverGround;
   }
   if (aisMessage.heading !== null) {
     output.heading = aisMessage.heading;
