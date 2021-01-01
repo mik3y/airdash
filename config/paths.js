@@ -53,12 +53,10 @@ module.exports = {
   dotenv: resolveApp('.env'),
   appPath: resolveApp('.'),
   appBuild: resolveApp('build'),
-  appPublic: resolveApp('public'),
-  appHtml: resolveApp('public/index.html'),
-  appIndexJs: resolveModule(resolveApp, 'src/index'),
-  appSrc: resolveApp('src'),
-  testsSetup: resolveModule(resolveApp, 'src/setupTests'),
-  swSrc: resolveModule(resolveApp, 'src/service-worker'),
+  appPublic: resolveApp('server/static'),
+  appHtml: resolveApp('server/static/index.html'),
+  appIndexJs: resolveModule(resolveApp, 'webapp/index'),
+  appSrc: resolveApp('webapp'),
   publicUrlOrPath,
 };
 
