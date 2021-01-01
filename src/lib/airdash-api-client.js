@@ -3,6 +3,26 @@
  */
 import { default as axios } from 'axios';
 
+class ClientError extends Error {
+  constructor(cause) {
+    super();
+    this.cause = cause;
+  }
+}
+
+class ConnectionError extends ClientError {
+  constructor(cause) {
+    super();
+    this.cause = cause;
+  }
+}
+
+class ResponseError extends ClientError {
+  constructor(cause) {
+    super();
+    this.cause = cause;
+  }
+}
 export default class AirdashApiClient {
   constructor(baseUrl) {
     this.baseUrl = baseUrl;
@@ -22,7 +42,12 @@ export default class AirdashApiClient {
       return result.data;
     } catch (err) {
       err.stack = stack;
-      throw err;
+      if (err.response) {
+        throw new ResponseError(err);
+      } else if (err.request) {
+        throw new ConnectionError(err);
+      }
+      throw new ClientError(err);
     }
   }
 
@@ -62,3 +87,7 @@ export default class AirdashApiClient {
     return data;
   }
 }
+
+AirdashApiClient.ClientError = ClientError;
+AirdashApiClient.ConnectionError = ConnectionError;
+AirdashApiClient.ResponseError = ResponseError;

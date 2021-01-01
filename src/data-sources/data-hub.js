@@ -54,9 +54,22 @@ export default class DataHub {
   }
 
   async refreshEntities() {
-    const result = await this.client.getEntities();
-    this.entities = result.entities;
-    this.onChange(this.entities);
+    let result;
+    try {
+      result = await this.client.getEntities();
+    } catch (e) {
+      if (e instanceof AirdashApiClient.ResponseError) {
+        debug(`AirDash API: response error: ${e.cause}`);
+      } else if (e instanceof AirdashApiClient.ConnectionError) {
+        debug(`AirDash API: connection error: ${e.cause}`);
+      } else {
+        console.error(`AirDash API: request error: ${e}`);
+      }
+    }
+    if (result) {
+      this.entities = result.entities;
+      this.onChange(this.entities);
+    }
   }
 
 }
