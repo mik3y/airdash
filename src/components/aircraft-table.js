@@ -12,16 +12,17 @@ const AircraftTable = (props) => {
   }
 
   const rows = aircraft.map((a) => {
+    const { adsbData } = a;
     return (
-      <tr key={a.addr}>
-        <td>{a.addr.toString(16).toUpperCase()}</td>
+      <tr key={adsbData.addr}>
+        <td>{adsbData.addr.toString(16).toUpperCase()}</td>
         <td>
-          <tt>{a.flight}</tt>
+          <tt>{adsbData.flight}</tt>
         </td>
-        <td>{a.squawk ? a.squawk.toString(16) : ""}</td>
-        <td>{a.altBaro}</td>
-        <td>{a.gs}</td>
-        <td>{a.distance}</td>
+        <td>{adsbData.squawk ? adsbData.squawk.toString(16) : ""}</td>
+        <td>{adsbData.altBaro}</td>
+        <td>{adsbData.gs}</td>
+        <td>{adsbData.distance}</td>
       </tr>
     );
   });

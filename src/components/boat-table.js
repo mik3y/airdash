@@ -4,30 +4,53 @@ import { Table } from "react-bootstrap";
 
 import "./boat-table.scss";
 
-const boatSort = (a, b) => {
-  if (a.mmsi === b.mmsi) {
-    return 0;
-  }
-  if (b.mmsi > a.mmsi) {
-    return -1;
-  }
-  return 1;
-};
-
 const BoatTable = (props) => {
-  const { boats } = useContext(DataHubContext);
+  const { boats, activeEntityId, setActiveEntityId } = useContext(
+    DataHubContext
+  );
 
   if (!boats.length) {
     return null;
   }
 
-  const rows = boats.sort(boatSort).map((b) => {
+  const toggleActive = (id) => {
+    if (activeEntityId === id) {
+      setActiveEntityId(null);
+    } else {
+      setActiveEntityId(id);
+    }
+  };
+
+  const entitySort = (a, b) => {
+    // Always sort the active entity to the top.
+    if (a.id === activeEntityId) {
+      return -2;
+    } else if (b.id === activeEntityId) {
+      return 2;
+    }
+
+    if (a.id === b.id) {
+      return 0;
+    }
+    if (b.id > a.id) {
+      return -1;
+    }
+    return 1;
+  };
+  
+  const rows = boats.sort(entitySort).map((b) => {
+    const { aisData } = b;
+    const rowColor = b.id === activeEntityId ? "table-primary" : "";
     return (
-      <tr key={b.mmsi}>
-        <td>{b.mmsi}</td>
-        <td>{b.name}</td>
-        <td>{b.speedOverGround}</td>
-        <td>{b.heading}</td>
+      <tr
+        key={aisData.mmsi}
+        className={rowColor}
+        onClick={() => toggleActive(b.id)}
+      >
+        <td>{aisData.mmsi}</td>
+        <td>{aisData.name}</td>
+        <td>{aisData.speedOverGround}</td>
+        <td>{aisData.heading}</td>
       </tr>
     );
   });

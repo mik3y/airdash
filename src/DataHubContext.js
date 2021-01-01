@@ -12,7 +12,7 @@ const DataHubContext = React.createContext(null);
  */
 export const DataHubProvider = function ({ children }) {
   const [entities, setEntities] = useState({});
-  const [activeEntityId, setActiveEntityId] = useState(null);
+  const [activeEntityId, doSetActiveEntityId] = useState(null);
 
   const onDataHubChange = (newEntities) => {
     setEntities(newEntities);
@@ -27,11 +27,16 @@ export const DataHubProvider = function ({ children }) {
 
   const aircraft = Object.values(entities)
     .filter((v) => v.type === "ADSB")
-    .map((v) => v.adsbData);
+    .map((v) => v);
 
   const boats = Object.values(entities)
     .filter((v) => v.type === "AIS")
-    .map((v) => v.aisData);
+    .map((v) => v);
+
+  const setActiveEntityId = (id) => {
+    // TODO(mikey): Validate here
+    doSetActiveEntityId(id);
+  }
 
   return (
     <DataHubContext.Provider
