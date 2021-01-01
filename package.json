@@ -9,8 +9,6 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "@typescript-eslint/eslint-plugin": "^4.5.0",
-    "@typescript-eslint/parser": "^4.5.0",
     "ais-stream-decoder": "^2.0.1",
     "axios": "^0.21.1",
     "babel-eslint": "^10.1.0",
@@ -25,8 +23,6 @@
     "case-sensitive-paths-webpack-plugin": "2.3.0",
     "css-loader": "4.3.0",
     "debug": "^4.3.1",
-    "dotenv": "8.2.0",
-    "dotenv-expand": "5.1.0",
     "eslint": "^7.11.0",
     "eslint-config-react-app": "^6.0.0",
     "eslint-plugin-flowtype": "^5.2.0",
@@ -58,7 +54,6 @@
     "lru-cache": "^6.0.0",
     "mini-css-extract-plugin": "0.11.3",
     "optimize-css-assets-webpack-plugin": "5.0.4",
-    "pnp-webpack-plugin": "1.6.4",
     "postcss-flexbugs-fixes": "4.2.1",
     "postcss-loader": "3.0.0",
     "postcss-normalize": "8.0.1",
@@ -75,7 +70,6 @@
     "react-leaflet": "^3.0.5",
     "react-refresh": "^0.8.3",
     "react-use-storage": "^0.4.3",
-    "resolve": "1.18.1",
     "resolve-url-loader": "^3.1.2",
     "sass": "^1.30.0",
     "sass-loader": "8.0.2",
@@ -88,12 +82,10 @@
     "webpack": "4.44.2",
     "webpack-dev-server": "3.11.0",
     "webpack-manifest-plugin": "2.2.0",
-    "winston": "^3.3.3",
-    "workbox-webpack-plugin": "5.1.4"
+    "winston": "^3.3.3"
   },
   "scripts": {
     "start": "WEBPACK_TARGET=prod node server/server.js",
-    "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "build-prod": "WEBPACK_TARGET=prod NODE_ENV=production webpack --config config/webpack.config.js --progress",
     "devserver": "WEBPACK_TARGET=local NODE_ENV=development nodemon --watch server devserver.js"
@@ -153,10 +145,6 @@
     "moduleFileExtensions": [
       "web.js",
       "js",
-      "web.ts",
-      "ts",
-      "web.tsx",
-      "tsx",
       "json",
       "web.jsx",
       "jsx",
