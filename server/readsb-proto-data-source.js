@@ -2,7 +2,7 @@ const debugLibrary = require("debug");
 const ReadsbProtoClient = require("./readsb-proto-client");
 const protobufjs = require("protobufjs");
 const AirdashProto = protobufjs.loadSync(
-  `${__dirname}/../src/proto/airdash.proto`
+  `${__dirname}/../proto/airdash.proto`
 );
 const LRU = require("lru-cache");
 

@@ -4,9 +4,9 @@ const AISClient = require("./ais-client");
 
 const debug = debugLibrary("airdash:ais-data-source");
 const protobufjs = require("protobufjs");
-const AISProto = protobufjs.loadSync(`${__dirname}/../src/proto/ais.proto`);
+const AISProto = protobufjs.loadSync(`${__dirname}/../proto/ais.proto`);
 const AirdashProto = protobufjs.loadSync(
-  `${__dirname}/../src/proto/airdash.proto`
+  `${__dirname}/../proto/airdash.proto`
 );
 const Settings = require('./settings');
 

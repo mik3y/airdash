@@ -1,5 +1,5 @@
 import debugLibrary from "debug";
-import AirdashApiClient from "../lib/airdash-api-client";
+import AirdashApiClient from "AirDash/webapp/lib/airdash-api-client";
 
 const debug = debugLibrary("airdash:DataHub");
 

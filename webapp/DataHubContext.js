@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import DataHub from "./data-sources/data-hub";
+import DataHub from "AirDash/webapp/lib/data-hub";
 
 const DataHubContext = React.createContext(null);
 

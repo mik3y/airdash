@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import DataHubContext from "../DataHubContext";
+import DataHubContext from "AirDash/webapp/DataHubContext";
 import { Button } from "react-bootstrap";
 
 import "./data-sources-table.scss";

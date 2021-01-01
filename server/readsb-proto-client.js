@@ -4,7 +4,7 @@
 const protobufjs = require('protobufjs');
 const axios = require('axios');
 
-const ReadsbProto = protobufjs.loadSync(`${__dirname}/../src/proto/readsb.proto`);
+const ReadsbProto = protobufjs.loadSync(`${__dirname}/../proto/readsb.proto`);
 
 class ReadsbClient {
   constructor(baseUrl) {

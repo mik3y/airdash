@@ -290,6 +290,7 @@ module.exports = function () {
         .map(ext => `.${ext}`)
         .filter(ext => !ext.includes('ts')),
       alias: {
+        AirDash: paths.appPath,
         // Allows for better profiling with ReactDevTools
         ...(isEnvProductionProfile && {
           'react-dom$': 'react-dom/profiling',
