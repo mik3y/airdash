@@ -8,13 +8,13 @@ import {
   Polyline,
   useMapEvent,
 } from "react-leaflet";
-import "./MapView.scss";
+import "./map-view.scss";
 
-import DataHubContext from "./DataHubContext";
-import PreferencesContext from "./PreferencesContext";
-import PlaneIcon from "./PlaneIcon";
-import BoatIcon from "./BoatIcon";
-import EntityPopup from "./components/entity-popup";
+import DataHubContext from "AirDash/webapp/providers/DataHubContext";
+import PreferencesContext from "AirDash/webapp/providers/PreferencesContext";
+import PlaneIcon from "./plane-icon";
+import BoatIcon from "./boat-icon";
+import EntityPopup from "./entity-popup";
 import L from "leaflet";
 
 // https://github.com/Leaflet/Leaflet/issues/4968#issuecomment-483402699

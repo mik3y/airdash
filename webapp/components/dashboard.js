@@ -1,9 +1,8 @@
 import React, { useContext } from "react";
-import MapView from "./MapView";
-import DataHubContext from "./DataHubContext";
-import AircraftTable from "./components/aircraft-table";
-import BoatTable from "./components/boat-table";
-import DataSourcesTable from "./components/data-sources-table";
+import MapView from "./map-view";
+import DataHubContext from "AirDash/webapp/providers/DataHubContext";
+import AircraftTable from "./aircraft-table";
+import BoatTable from "./boat-table";
 import { Accordion, Card } from "react-bootstrap";
 
 function Dashboard() {

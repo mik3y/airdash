@@ -27,6 +27,7 @@ A new/experimental web frontend for showing realtime ADS-B (airplane) and AIS (s
 - [Developer instructions](#developer-instructions)
   - [Prerequisites](#prerequisites)
   - [Using the `devserver`](#using-the-devserver)
+  - [Directory structure](#directory-structure)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
 - [License](#license)
@@ -169,6 +170,16 @@ When you run the server using `yarn devserver` instead of `yarn start`, the serv
 
 * Frontend code changes (code in `src/`) are automatically built and hot reloaded in your browser.
 * Backend code changes (code in `server/`) cause the devserver to reload.
+
+### Directory structure
+
+Here is how the code is structured.
+
+* `server/`: All code implementing the backend server. This small server application uses the [Koa web framework](https://koajs.com/).
+* `webapp/`: All code implementing the frontend. This is a [React JS](https://reactjs.org/) single page web application.
+* `proto/`: Data structure definitions, in [Protocol Buffer](https://developers.google.com/protocol-buffers) format.
+
+Both the server and the webapp depend on `proto` files. However, no other code is currently shared between these applications.
 
 ## Contributing
 

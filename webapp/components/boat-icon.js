@@ -1,8 +1,8 @@
 import L from "leaflet";
-import Boat from "./images/boat.svg";
+import Boat from "AirDash/webapp/images/boat.svg";
 import ReactDOMServer from "react-dom/server";
 
-import './BoatIcon.scss'
+import './boat-icon.scss'
 
 const STYLE = {
   width: 32,

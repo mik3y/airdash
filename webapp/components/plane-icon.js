@@ -1,8 +1,8 @@
 import L from "leaflet";
-import Plane from "./images/airplane.svg";
+import Plane from "AirDash/webapp/images/airplane.svg";
 import ReactDOMServer from 'react-dom/server';
 
-import './PlaneIcon.scss';
+import './plane-icon.scss';
 
 const STYLE = {
     width: 32,
