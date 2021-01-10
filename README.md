@@ -77,10 +77,12 @@ $ docker run --rm -i -t -p 8888:8000 -e DATA_SOURCES=ais-tcp://localhost:10111 a
 ### Environment variables
 
 * `DATA_SOURCES`: A comma-delimited list of data sources to connect to. See _Supported Data Sources_ for configuration details.
+* `DEBUG`: Controls extra debugging logging from the server. Use `DEBUG='airdash:*'` for maximum verbosity.
 
 ## Project Status & Goals
 
 Status: **Alpha**. Things are in rapid development and may be broken. Bug reports and feature requests are welcome, please [file them here](https://github.com/mik3y/airdash/issues).
+
 ### Goals
 
 This project is meant to be a standalone webapp for locally visualizing and exploring ADS-B and AIS telemetry data. Why another frontend? I have a few goals (besides the main goal: have fun).
@@ -108,7 +110,7 @@ DATA_SOURCES=readsb-proto://localhost:8080
 
 #### `ais-tcp://` (AIS data from a TCP stream)
 
-AIS (aircraft) data can be read from a TCP stream that exposes in in NMEA format.
+AIS (boat) data can be read from a TCP stream that exposes in NMEA format.
 
 Example:
 
@@ -117,19 +119,28 @@ Example:
 DATA_SOURCES=ais-tcp://localhost:10111
 ```
 
-
 #### `ais-serial://` (AIS data from a serial port)
 
-AIS (aircraft) data can be read from a serial port that exposes in in NMEA format.
+AIS (boat) data can be read from a serial port that exposes in in NMEA format.
 
 Example:
 
 ```
 # Read AIS data from the local serial port
+DATA_SOURCES=ais-serial:///dev/ttyS0
+```
+
+(Yes the three slashes in `ais-serial:///` are correct; two are part of `ais-serial://`, and the rest is the absolute file path `/dev/ttyS0`).
+
+Optionally, you can specify the serial port baud rate with `?baud=<rate>`.
+
+```
 DATA_SOURCES=ais-serial:///dev/ttyS0?baud=57600
 ```
 
-Note: When running AirDash under Docker, you may need to supply the flag `--device=/dev/ttyS0` to expose your serial device to Docker.
+If unspecified, baud rate will be unchanged.
+
+**Note:** When running AirDash under Docker, you may need to supply the flag `--device=/dev/ttyS0` to expose your serial device to Docker.
 
 ## The AirDash Server
 
