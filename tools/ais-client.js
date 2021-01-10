@@ -5,15 +5,19 @@ debugLibrary.enable("airdash:*");
 
 const debug = debugLibrary("airdash:ais-client");
 
-const runClient = ({ hostname, port }) => {
-  const client = new AISClient(hostname, port, (message) => {
+const runClient = (url) => {
+  const client = new AISClient(url, (message) => {
     debug(`Got message: ${JSON.stringify(message)}`);
   });
   client.connect();
 };
 
 const usage = () => {
-  console.error(`Usage: ${process.argv[1]} host:port`);
+  console.error(`Usage: ${process.argv[1]} <url>`);
+  console.error('');
+  console.error('Examples:');
+  console.error(`  ${process.argv[1]} ais-tcp://localhost:10111`);
+  console.error(`  ${process.argv[1]} ais-serial:///dev/ttyS0`);
 };
 
 const run = () => {
@@ -22,9 +26,8 @@ const run = () => {
       usage();
       process.exit(1);
   }
-  const hostString = argv._[0];
-  const [hostname, port] = hostString.split(':');
-  runClient({ hostname, port })
+  const urlString = argv._[0];
+  runClient(urlString);
 };
 
 run();

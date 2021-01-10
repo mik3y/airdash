@@ -6,7 +6,6 @@ A new/experimental web frontend for showing realtime ADS-B (airplane) and AIS (s
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [Screenshots](#screenshots)
 - [Quickstart](#quickstart)
   - [Run directly from source](#run-directly-from-source)
@@ -17,6 +16,9 @@ A new/experimental web frontend for showing realtime ADS-B (airplane) and AIS (s
 - [Project Status & Goals](#project-status--goals)
   - [Goals](#goals)
   - [Supported Data Sources](#supported-data-sources)
+    - [`readsb-proto://` (ADS-B data)](#readsb-proto-ads-b-data)
+    - [`ais-tcp://` (AIS data from a TCP stream)](#ais-tcp-ais-data-from-a-tcp-stream)
+    - [`ais-serial://` (AIS data from a serial port)](#ais-serial-ais-data-from-a-serial-port)
 - [The AirDash Server](#the-airdash-server)
   - [Server responsibilities](#server-responsibilities)
   - [Server API](#server-api)
@@ -48,7 +50,7 @@ Here's how you can give AirDash a spin.
 ```
 $ cd airdash/
 $ yarn
-$ export DATA_SOURCES=readsb-proto://localhost:8080,ais://localhost:10111
+$ export DATA_SOURCES=readsb-proto://localhost:8080,ais-tcp://localhost:10111
 $ yarn devserver
 ```
 ### Run from Docker (using official builds)
@@ -56,7 +58,7 @@ $ yarn devserver
 Pre-built Docker images are available for x86 and ARM (Raspberry Pi):
 
 ```
-$ docker run --rm -i -t -p 8888:8000 -e DATA_SOURCES=ais://localhost:10111 mik3y/airdash
+$ docker run --rm -i -t -p 8888:8000 -e DATA_SOURCES=ais-tcp://localhost:10111 mik3y/airdash
 ```
 
 When run as above, the container will expose a web service on `http://localhost:8888`.
@@ -67,16 +69,14 @@ You can build and run from Docker locally, too:
 
 ```
 $ docker build -t airdash .
-$ docker run --rm -i -t -p 8888:8000 -e DATA_SOURCES=ais://localhost:10111 airdash
+$ docker run --rm -i -t -p 8888:8000 -e DATA_SOURCES=ais-tcp://localhost:10111 airdash
 ```
 
 ## Configuration
 
 ### Environment variables
 
-* `DATA_SOURCES`: A comma-delimited list of data sources to connect to. Each should be a URI with a hostname and port component. Supported protocols:
-    * `readsb-proto://<host>:<port>`: Reads ADS-B telemetry from a [readsb-proto](https://github.com/Mictronics/readsb-protobuf) server.
-    * `ais://<host>:<port>`: Reads AIS telemtry from an AIS NMEA TCP stream.
+* `DATA_SOURCES`: A comma-delimited list of data sources to connect to. See _Supported Data Sources_ for configuration details.
 
 ## Project Status & Goals
 
@@ -95,8 +95,41 @@ This project is meant to be a standalone webapp for locally visualizing and expl
 
 The app currently supports:
 
-* ADS-B data, from [readsb-proto](https://github.com/Mictronics/readsb-protobuf). 
-* AIS data, from any compatible NMEA TCP stream.
+#### `readsb-proto://` (ADS-B data)
+
+ADS-B (aircraft) data is supported through [readsb-proto](https://github.com/Mictronics/readsb-protobuf). You should be running `readsb-proto` somewhere on your network.
+
+Example:
+
+```
+# Read from readsb-proto which is runnning locally on port 8080.
+DATA_SOURCES=readsb-proto://localhost:8080
+```
+
+#### `ais-tcp://` (AIS data from a TCP stream)
+
+AIS (aircraft) data can be read from a TCP stream that exposes in in NMEA format.
+
+Example:
+
+```
+# Read AIS data from a server offering it locally on port 10111.
+DATA_SOURCES=ais-tcp://localhost:10111
+```
+
+
+#### `ais-serial://` (AIS data from a serial port)
+
+AIS (aircraft) data can be read from a serial port that exposes in in NMEA format.
+
+Example:
+
+```
+# Read AIS data from the local serial port
+DATA_SOURCES=ais-serial:///dev/ttyS0?baud=57600
+```
+
+Note: When running AirDash under Docker, you may need to supply the flag `--device=/dev/ttyS0` to expose your serial device to Docker.
 
 ## The AirDash Server
 

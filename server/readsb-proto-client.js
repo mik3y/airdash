@@ -6,6 +6,8 @@ const axios = require('axios');
 
 const ReadsbProto = protobufjs.loadSync(`${__dirname}/../proto/readsb.proto`);
 
+const PROTOCOL_READSB_PROTO = 'readsb-proto:';
+
 class ReadsbClient {
   constructor(baseUrl) {
     this.baseUrl = baseUrl;
@@ -62,5 +64,7 @@ class ReadsbClient {
     return data;
   }
 }
+
+ReadsbClient.PROTOCOL_READSB_PROTO = PROTOCOL_READSB_PROTO;
 
 module.exports = ReadsbClient;

@@ -9,9 +9,8 @@ const LRU = require("lru-cache");
 const debugLibrary = require("debug");
 const debug = debugLibrary("airdash:connection-manager");
 const geolib = require('geolib');
-
-const PROTOCOL_AIS = "ais:";
-const PROTOCOL_READSB_PROTO = "readsb-proto:";
+const { PROTOCOL_AIS_TCP, PROTOCOL_AIS_SERIAL } = require('./ais-client');
+const { PROTOCOL_READSB_PROTO } = require('./readsb-proto-client');
 
 // Maximum number of points per track.
 // TODO(mikey): Should be smarter.
@@ -50,7 +49,8 @@ class ConnectionManager {
 
     let dataSource;
     switch (url.protocol) {
-      case PROTOCOL_AIS:
+      case PROTOCOL_AIS_SERIAL:
+      case PROTOCOL_AIS_TCP:
         dataSource = this._createAisDataSource(url);
         break;
       case PROTOCOL_READSB_PROTO:
@@ -72,7 +72,7 @@ class ConnectionManager {
   }
 
   _getConnectionId(url) {
-    return `${url.protocol}${url.hostname}:${url.port}`;
+    return url.href;
   }
 
   _createAisDataSource(url) {

@@ -1,6 +1,7 @@
 const net = require("net");
 const AisDecoder = require("ais-stream-decoder").default;
 const split = require("split");
+const SerialPort = require("serialport");
 const debugLibrary = require("debug");
 
 const STATUS_DISCONNECTED = "disconnected";
@@ -10,23 +11,36 @@ const STATUS_CONNECTED = "connected";
 
 const RECONNECT_TIMEOUT = 5000;
 
+const PROTOCOL_AIS_TCP = "ais-tcp:";
+const PROTOCOL_AIS_SERIAL = "ais-serial:";
+
 const debug = debugLibrary("airdash:AISClient");
 
 /**
- * A TCP client for an AIS NMEA data stream.
+ * A client for an AIS NMEA data stream.
+ *
+ * This client supports reading from two kinds of streams: A TCP socket, or
+ * a serial port. The type of stream it reads from is specified by the URL
+ * provided to the constructor.
  */
 class AISClient {
-  constructor(hostname, port) {
-    this.hostname = hostname;
-    this.port = port;
+  /**
+   * Constructor.
+   *
+   * @param {string} urlString The source to connect to
+   * @param {function} onMessage Callback that fires with a newly-received message
+   */
+  constructor(urlString, onMessage) {
+    this.url = new URL(urlString);
+    this.onMessage = onMessage;
 
     this.status = STATUS_DISCONNECTED;
 
-    this.socket = null;
+    this.fd = null;
     this.reconnectTimeout = null;
   }
 
-  connect(onMessage) {
+  connect() {
     if (
       this.status !== STATUS_DISCONNECTED &&
       this.status !== STATUS_RECONNECTING
@@ -40,38 +54,77 @@ class AISClient {
     }
 
     this.status = STATUS_CONNECTING;
-    this.socket = new net.Socket();
 
-    this.socket.on("close", () => {
+    switch (this.url.protocol) {
+      case PROTOCOL_AIS_TCP:
+        return this._connectTcp();
+      case PROTOCOL_AIS_SERIAL:
+        return this._connectSerial();
+      default:
+        throw new Error(`Unknown AIS url: ${this.url}`);
+    }
+  }
+
+  _connectTcp() {
+    this.fd = new net.Socket();
+    this.fd.on("close", () => {
       this._handleDisconnect();
     });
 
-    this.socket.on("error", (err) => {
+    this.fd.on("error", (err) => {
       this._handleError(err);
     });
 
-    this.socket.connect(this.port, this.hostname, () => {
-      this.status = STATUS_CONNECTED;
-      const aisDecoder = new AisDecoder({ silent: true });
-      this.socket
-        .pipe(split())
-        .pipe(aisDecoder)
-        .on("data", (decodedMessage) => {
-          onMessage(JSON.parse(decodedMessage));
-        });
+    debug(
+      `Opening TCP connection to ${this.url.hostname}:${this.url.port} ...`
+    );
+
+    this.fd.connect(this.url.port, this.url.hostname, () => this._startPipeline());
+  }
+
+  _connectSerial() {
+    const options = {};
+    if (this.url.searchParams.baud) {
+      options.baudRate = Number.parseInt(this.url.searchParams.baud, 10);
+    }
+    const filename = this.url.pathname;
+
+    debug(`Opening serial connection on ${filename} options=${JSON.stringify(options)} ...`);
+
+    this.fd = new SerialPort(this.url.pathname, options);
+
+    this.fd.on("error", (err) => {
+      this._handleError(err);
     });
+
+    this._startPipeline();
+  }
+
+  _startPipeline() {
+    debug('Starting decoding pipeline ...');
+    this.status = STATUS_CONNECTED;
+    const aisDecoder = new AisDecoder({ silent: true });
+    this.fd
+      .pipe(split())
+      .pipe(aisDecoder)
+      .on("data", (decodedMessage) => {
+        this.onMessage(JSON.parse(decodedMessage));
+      });
   }
 
   disconnect() {
-    if (!this.socket) {
+    if (!this.fd) {
       return;
     }
-    this.socket.destroy();
+    this.fd.destroy();
     this.status = STATUS_DISCONNECTED;
   }
 
   _handleDisconnect() {
-    if (this.status !== STATUS_DISCONNECTED && this.status !== STATUS_RECONNECTING) {
+    if (
+      this.status !== STATUS_DISCONNECTED &&
+      this.status !== STATUS_RECONNECTING
+    ) {
       debug(`Got disconnected, scheduling reconnect`);
       this._scheduleReconnect();
     }
@@ -79,7 +132,10 @@ class AISClient {
 
   _handleError(err) {
     debug(`Got error: ${err}`);
-    if (this.status !== STATUS_DISCONNECTED && this.status !== STATUS_RECONNECTING) {
+    if (
+      this.status !== STATUS_DISCONNECTED &&
+      this.status !== STATUS_RECONNECTING
+    ) {
       this._scheduleReconnect();
     }
   }
@@ -92,12 +148,10 @@ class AISClient {
     this.status = STATUS_RECONNECTING;
     this.reconnectTimeout = setTimeout(() => this.connect(), RECONNECT_TIMEOUT);
   }
-
-  _handleNewMessage(message) {
-    if (this.onMessage) {
-      this.onMessage(message);
-    }
-  }
 }
+
+// Export some constants for others.
+AISClient.PROTOCOL_AIS_SERIAL = PROTOCOL_AIS_SERIAL;
+AISClient.PROTOCOL_AIS_TCP = PROTOCOL_AIS_TCP;
 
 module.exports = AISClient;

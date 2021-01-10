@@ -165,7 +165,7 @@ class AISDataSource {
     this.url = url;
     this.onUpdate = onUpdate;
     this.onError = onError;
-    this.client = new AISClient(url.hostname, url.port);
+    this.client = new AISClient(this.url, (message) => this._onClientMessage(message));
     this.cache = new LRU({
       max: 1000,
       maxAge: 60 * 60 * 1000,
@@ -180,24 +180,26 @@ class AISDataSource {
     if (this.poller) {
       return;
     }
-    this.client.connect((message) => {
-      try {
-        this._processUpdate(message);
-      } catch (e) {
-        // Occasionally a malformed message (or our own bug) might
-        // crash the message processor. If we are in debug mode, allow it to
-        // crash things so a developer can attend to it. Otherwise, scold in
-        // logs and keep charging on.
-        console.error("Error processing update:", JSON.stringify(message));
-        if (Settings.debug) {
-          throw e;
-        }
-      }
-    });
+    this.client.connect();
   }
 
   stop() {
     this.client.disconnect();
+  }
+
+  _onClientMessage(message) {
+    try {
+      this._processUpdate(message);
+    } catch (e) {
+      // Occasionally a malformed message (or our own bug) might
+      // crash the message processor. If we are in debug mode, allow it to
+      // crash things so a developer can attend to it. Otherwise, scold in
+      // logs and keep charging on.
+      console.error("Error processing update:", JSON.stringify(message));
+      if (Settings.debug) {
+        throw e;
+      }
+    }
   }
 
   _processUpdate(update) {
