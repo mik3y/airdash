@@ -39,12 +39,16 @@ const PlaneIcon = (aircraft) => {
   };
   const altitude = aircraft.altGeom || 0;
   const altitudeClass = `altitude-${getAltitudeLevel(altitude)}`;
+  const addrName = aircraft.addr.toString(16).toUpperCase();
   const icon = L.divIcon({
     className: "custom-icon",
     popupAnchor: [0, -16],
     html: ReactDOMServer.renderToString((
         <div key={`icon-${aircraft.addr}`} className="plane-icon">
             <Plane style={style} className={altitudeClass} />
+            <div className="map-icon-detail">
+              <div className="callsign">{aircraft.flight || addrName}</div>
+            </div>
         </div>
     )),
   });

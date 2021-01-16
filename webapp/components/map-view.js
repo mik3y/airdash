@@ -27,12 +27,12 @@ L.Icon.Default.mergeOptions({
 
 /** Listens to Leaflet events and connects them to our own components. */
 const MapStateHandler = () => {
-  const { setMapCenter, setZoomLevel } = useContext(PreferencesContext);
+  const { setMapCenter, setZoomLevel, zoomLevel } = useContext(PreferencesContext);
 
   useMapEvent("zoomend", (e) => {
     const map = e.target;
-    const zoomLevel = map.getZoom();
-    setZoomLevel(zoomLevel);
+    const newZoomLevel = map.getZoom();
+    setZoomLevel(newZoomLevel);
   });
 
   useMapEvent("moveend", (e) => {
@@ -119,7 +119,7 @@ const MapView = (props) => {
     .filter(Boolean);
 
   return (
-    <div>
+    <div className={`map-zoom-${zoomLevel}`}>
       <MapContainer
         center={mapCenter}
         zoom={zoomLevel}

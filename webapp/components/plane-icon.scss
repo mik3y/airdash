@@ -73,5 +73,12 @@ $color-altitude-11: lighten($color-altitude-8, 30);
     path {
       fill: $color-altitude-10;
     }
-  }  
+  }
+  .callsign {
+    border-radius: 4px;
+    background-color: rgb(255, 255, 255, 0.8);
+    padding: 0.1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
 }
