@@ -39,7 +39,7 @@ const BoatTable = (props) => {
   };
   
   const rows = boats.sort(entitySort).map((b) => {
-    const { aisData } = b;
+    const { aisData } = b.shipInfo;
     const rowColor = b.id === activeEntityId ? "table-primary" : "";
     return (
       <tr

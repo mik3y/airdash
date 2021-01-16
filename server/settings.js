@@ -19,7 +19,7 @@ class Settings {
     this.debug;
   }
 
-  async load() {
+  load() {
     this.loadFromEnv();
     this.loadFromFile();
     debug(`Settings loaded: ${JSON.stringify(this.toJSON())}`);
@@ -42,7 +42,6 @@ class Settings {
   }
 
   loadFromEnv() {
-    debug('loading from env', process.env)
     const { DATA_SOURCES, DEBUG } = process.env;
     if (DATA_SOURCES) {
       this.dataSources = DATA_SOURCES.split(",");
@@ -70,5 +69,4 @@ class Settings {
 
 const sSingleton = new Settings();
 sSingleton.load();
-
 module.exports = sSingleton;

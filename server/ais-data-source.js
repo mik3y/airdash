@@ -213,12 +213,14 @@ class AISDataSource {
         id: mmsi,
         type: AirdashProto.EntityType.AIS,
       });
-    const aisData = protoFromMessage(update, entityStatus.aisData);
+    const aisData = protoFromMessage(update, entityStatus.shipInfo.aisData);
     if (!aisData) {
       return;
     }
     // debug(`Updating ${mmsi}`);
-    entityStatus.aisData = aisData;
+    entityStatus.shipInfo = {
+      aisData,
+    };
     entityStatus.lat = aisData.lat;
     entityStatus.lon = aisData.lon;
     entityStatus.lastUpdatedMillis = new Date().getTime();

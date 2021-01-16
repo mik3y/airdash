@@ -3,3 +3,4 @@ build/
 node_modules/
 .git/
 README.md
+db/*.json

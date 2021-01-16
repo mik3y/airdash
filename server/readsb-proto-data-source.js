@@ -4,9 +4,12 @@ const protobufjs = require("protobufjs");
 const AirdashProto = protobufjs.loadSync(
   `${__dirname}/../proto/airdash.proto`
 );
+const AuxDb = require("./aux-db");
 const LRU = require("lru-cache");
 
 const debug = debugLibrary("airdash:ReadsbProtoDataSource");
+
+const OPERATOR_PREFIX_RE = /^[A-Z]{3}/;
 
 /**
  * An AirDash data source that reads from a readsb-proto HTTP service.
@@ -65,6 +68,21 @@ class ReadsbProtoDataSource {
     }
   }
 
+  getOperatorAndCountry(adsbData) {
+    const flight = adsbData.flight;
+    if (flight) {
+      const m = OPERATOR_PREFIX_RE.exec(flight);
+      if (m) {
+        const code = m[0];
+        const dbEntry = AuxDb.operators[code];
+        if (dbEntry) {
+          return dbEntry.slice(0, 2);
+        }
+      }
+    }
+    return ["", ""];
+  }
+
   _processUpdate(update) {
     update.aircraft.forEach((aircraft) => {
       const id = aircraft.addr.toString(16).toUpperCase();
@@ -82,9 +100,20 @@ class ReadsbProtoDataSource {
         // Ignore updates before we have position information.
         return;
       }
+      const [tailNumber, typeCode] = AuxDb.aircrafts[id] || ["", ""];
+      const [operator, country] = this.getOperatorAndCountry(aircraft);
       entityStatus.lat = currentLat;
       entityStatus.lon = currentLon;
-      entityStatus.adsbData = aircraft;
+      entityStatus.aircraftInfo = {
+        ...entityStatus.aircraftInfo,
+        adsbData: {
+          ...aircraft,
+          flight: aircraft.flight && aircraft.flight.trim(),
+        },
+        tailNumber,
+        typeCode,
+        operator,
+      };
       this.cache.set(id, entityStatus);
       this.onUpdate(entityStatus);
     });

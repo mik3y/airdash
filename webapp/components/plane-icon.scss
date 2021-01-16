@@ -11,13 +11,20 @@ $color-altitude-9: lighten($color-altitude-8, 10);
 $color-altitude-10: lighten($color-altitude-8, 20);
 $color-altitude-11: lighten($color-altitude-8, 30);
 
+$color-altitude-ground: #cccccc;
+
 .plane-icon {
   position: absolute;
-  right: -100%;
+  left: -100%;
   top: -100%;
   path {
     stroke: #222222;
     stroke-width: 8px;
+  }
+  .altitude-ground {
+    path {
+      fill: $color-altitude-ground;
+    }
   }
   .altitude-0 {
     path {
@@ -75,10 +82,8 @@ $color-altitude-11: lighten($color-altitude-8, 30);
     }
   }
   .callsign {
-    border-radius: 4px;
-    background-color: rgb(255, 255, 255, 0.8);
-    padding: 0.1em;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+    font-weight: bold;
+  }
+  .tail-number {
   }
 }

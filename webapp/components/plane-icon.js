@@ -22,32 +22,42 @@ const ALTITUDE_LEVELS = [
   40000,
 ];
 
-const getAltitudeLevel = altitude => {
+const getCssClassForStatus = (airGroundStatus, altitude) => {
+  if (airGroundStatus === 'AG_GROUND') {
+    return 'altitude-ground';
+  }
+
   for (let [i, v] of ALTITUDE_LEVELS.entries()) {
     if (altitude < v) {
-      return i;
+      return `altitude-${i}`;
     }
   }
-  return ALTITUDE_LEVELS.length;
+  return `altitude-${ALTITUDE_LEVELS.length}`;
 }
 
-const PlaneIcon = (aircraft) => {
-  const rotation = aircraft ? aircraft.track : 0;
+const PlaneIcon = (aircraftInfo) => {
+  const { adsbData, tailNumber, typeCode } = aircraftInfo;
+  const rotation = adsbData ? adsbData.track : 0;
   const style = {
       ...STYLE,
       transform: `rotate(${rotation}deg)`,
   };
-  const altitude = aircraft.altGeom || 0;
-  const altitudeClass = `altitude-${getAltitudeLevel(altitude)}`;
-  const addrName = aircraft.addr.toString(16).toUpperCase();
+  const altitude = adsbData.altGeom || 0;
+  const altitudeClass = getCssClassForStatus(adsbData.airGround, altitude);
+  const addrName = adsbData.addr.toString(16).toUpperCase();
+
+  const callsign = adsbData.flight || addrName;
+  const showTailNumber = tailNumber && tailNumber !== callsign;
+
   const icon = L.divIcon({
     className: "custom-icon",
     popupAnchor: [0, -16],
     html: ReactDOMServer.renderToString((
-        <div key={`icon-${aircraft.addr}`} className="plane-icon">
+        <div key={`icon-${adsbData.addr}`} className="plane-icon">
             <Plane style={style} className={altitudeClass} />
             <div className="map-icon-detail">
-              <div className="callsign">{aircraft.flight || addrName}</div>
+              <div className="callsign">{callsign}</div>
+              {showTailNumber && <div className="tail-number">{tailNumber}</div>}
             </div>
         </div>
     )),

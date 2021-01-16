@@ -4,11 +4,13 @@ import PropTypes from "prop-types";
 import "./entity-popup.scss";
 
 const AircraftDetail = ({ entity }) => {
-  const { adsbData } = entity;
+  const { aircraftInfo } = entity;
+  const { adsbData } = aircraftInfo;
   const title = adsbData.flight || entity.id;
   return (
     <div>
       <h3>{title}</h3>
+      {aircraftInfo.operator && <div className="operator">{aircraftInfo.operator}</div>}
       <table className="table table-condensed table-hover popup-table">
         <tbody>
           <tr>
@@ -83,7 +85,7 @@ const NavigationalStatus = ({ status }) => {
 };
 
 const VesselDetail = ({ entity }) => {
-  const { aisData } = entity;
+  const { aisData } = entity.shipInfo;
   const title = aisData.name || aisData.callSign || aisData.mmsi;
   return (
     <div>

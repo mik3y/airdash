@@ -86,9 +86,9 @@ const MapView = (props) => {
       }
       let icon;
       if (type === "ADSB") {
-        icon = PlaneIcon(entity.adsbData);
+        icon = PlaneIcon(entity.aircraftInfo);
       } else if (type === "AIS") {
-        icon = BoatIcon(entity.aisData);
+        icon = BoatIcon(entity.shipInfo.aisData);
       } else {
         return null;
       }

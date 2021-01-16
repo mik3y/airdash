@@ -19,12 +19,34 @@ message EntityStatus {
     double lon = 4;
     int64 last_updated_millis = 5;
     
-    AircraftMeta adsb_data = 10;
-    PositionReport ais_data = 11;
-
+    AircraftInfo aircraft_info = 10;
+    ShipInfo ship_info = 11;
     repeated TrackPosition track = 16;
 }
 
+// AirDash's detailed information struct for aircraft.
+message AircraftInfo {
+    // Raw ADS-B data. Always present.
+    AircraftMeta adsb_data = 1;
+
+    // Tail number, if known.
+    string tail_number = 2;
+
+    // Operate name, if known.
+    string operator = 3;
+
+    // Type code, if known.
+    string type_code = 4;
+}
+
+// AirDash's detailed information struct for ships.
+message ShipInfo {
+    // Last-received aggregated AIS data. Always present.
+    PositionReport ais_data = 1;
+}
+
+
+// TrackPosition is an inner structure type, used in other messages here.
 message TrackPosition {
     double lat = 1;
     double lon = 2;
