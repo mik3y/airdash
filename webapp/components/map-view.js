@@ -92,11 +92,17 @@ const MapView = (props) => {
       } else {
         return null;
       }
+
+      // Dim inactive entities if one is selected.
+      const isActiveEntity = activeEntityId === id;
+      const opacity = (isActiveEntity || !activeEntityId) ? 1.0 : 0.6;
+
       return (
         <React.Fragment key={id}>
           <Marker
             position={[lat, lon]}
             icon={icon}
+            opacity={opacity}
             eventHandlers={{
               popupopen: (e) => {
                 setActiveEntityId(id);
