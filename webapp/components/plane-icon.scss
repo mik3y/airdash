@@ -87,3 +87,11 @@ $color-altitude-ground: #cccccc;
   .tail-number {
   }
 }
+
+.callsign {
+  white-space: nowrap;
+  .flag-icon {
+    display: inline-block;
+    height: 10px;
+  }
+}

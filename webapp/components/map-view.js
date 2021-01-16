@@ -9,6 +9,7 @@ import {
   useMapEvent,
 } from "react-leaflet";
 import "./map-view.scss";
+import debounce from 'debounce';
 
 import DataHubContext from "AirDash/webapp/providers/DataHubContext";
 import PreferencesContext from "AirDash/webapp/providers/PreferencesContext";
@@ -29,17 +30,18 @@ L.Icon.Default.mergeOptions({
 const MapStateHandler = () => {
   const { setMapCenter, setZoomLevel, zoomLevel } = useContext(PreferencesContext);
 
-  useMapEvent("zoomend", (e) => {
+  useMapEvent("zoomend", debounce((e) => {
     const map = e.target;
     const newZoomLevel = map.getZoom();
     setZoomLevel(newZoomLevel);
-  });
+  }, 200));
 
-  useMapEvent("moveend", (e) => {
+  useMapEvent("moveend", debounce((e) => {
     const map = e.target;
     const center = map.getCenter();
-    setMapCenter([center.lat, center.lng]);
-  });
+    const [lat, lng] = [center.lat.toFixed(6), center.lng.toFixed(6)];
+    setMapCenter([lat, lng]);
+  }, 500));
 
   return null;
 };
