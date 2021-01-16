@@ -100,8 +100,11 @@ class ReadsbProtoDataSource {
         // Ignore updates before we have position information.
         return;
       }
-      const [tailNumber, typeCode] = AuxDb.aircrafts[id] || ["", ""];
-      const [operator, country] = this.getOperatorAndCountry(aircraft);
+
+      const [tailNumber, typeDesignator] = AuxDb.aircrafts[id] || ["", ""];
+      const [typeName, typeCode, typeWtc] = AuxDb.types[typeDesignator] || ["", "", ""];
+
+      const [operator, countryName] = this.getOperatorAndCountry(aircraft);
       entityStatus.lat = currentLat;
       entityStatus.lon = currentLon;
       entityStatus.aircraftInfo = {
@@ -111,8 +114,12 @@ class ReadsbProtoDataSource {
           flight: aircraft.flight && aircraft.flight.trim(),
         },
         tailNumber,
+        typeDesignator,
         typeCode,
+        typeName,
+        typeWtc,
         operator,
+        countryName,
       };
       this.cache.set(id, entityStatus);
       this.onUpdate(entityStatus);

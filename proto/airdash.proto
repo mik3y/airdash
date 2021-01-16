@@ -35,8 +35,20 @@ message AircraftInfo {
     // Operate name, if known.
     string operator = 3;
 
-    // Type code, if known.
-    string type_code = 4;
+    // Type designator, if known, like "A1"
+    string type_designator = 4;
+
+    // Type code, if known, like "L1P"
+    string type_code = 5;
+
+    // Type name, if known, like "DOUGLAS A-1 Skyraider"/
+    string type_name = 6;
+
+    // Type wake turbulence category, like "M".
+    string type_wtc = 7;
+
+    // Country name, if known.
+    string country_name = 8;
 }
 
 // AirDash's detailed information struct for ships.

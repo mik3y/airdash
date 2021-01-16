@@ -13,6 +13,10 @@ const AircraftDetail = ({ entity }) => {
       {aircraftInfo.operator && <div className="operator">{aircraftInfo.operator}</div>}
       <table className="table table-condensed table-hover popup-table">
         <tbody>
+          {aircraftInfo.typeName && <tr>
+            <th>Type</th>
+            <td>{aircraftInfo.typeName}</td>
+          </tr>}
           <tr>
             <th>Squawk</th>
             <td>{adsbData.squawk}</td>
