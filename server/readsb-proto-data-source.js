@@ -6,6 +6,7 @@ const AirdashProto = protobufjs.loadSync(
 );
 const AuxDb = require("./aux-db");
 const LRU = require("lru-cache");
+const { SPEED_UNKNOWN, ALTITUDE_UNKNOWN } = require('./constants');
 
 const debug = debugLibrary("airdash:ReadsbProtoDataSource");
 
@@ -94,19 +95,24 @@ class ReadsbProtoDataSource {
           lat: aircraft.lat,
           lon: aircraft.lon,
         });
+
+      // Ignore updates before we have position information.
       const currentLat = aircraft.lat;
       const currentLon = aircraft.lon;
       if (currentLat === 0 && currentLon === 0 && entityStatus.lat === 0 && entityStatus.lon === 0) {
-        // Ignore updates before we have position information.
         return;
       }
 
-      const [tailNumber, typeDesignator] = AuxDb.aircrafts[id] || ["", ""];
-      const [typeName, typeCode, typeWtc] = AuxDb.types[typeDesignator] || ["", "", ""];
-
-      const [operator, countryName] = this.getOperatorAndCountry(aircraft);
+      // Update top-level (common) fields.
       entityStatus.lat = currentLat;
       entityStatus.lon = currentLon;
+      entityStatus.speed = aircraft.gs || entityStatus.gs || SPEED_UNKNOWN;
+      entityStatus.altitude = aircraft.altBaro || entityStatus.altBaro || ALTITUDE_UNKNOWN;
+
+      // Update the aircraftInfo struct.
+      const [tailNumber, typeDesignator] = AuxDb.aircrafts[id] || ["", ""];
+      const [typeName, typeCode, typeWtc] = AuxDb.types[typeDesignator] || ["", "", ""];
+      const [operator, countryName] = this.getOperatorAndCountry(aircraft);
       entityStatus.aircraftInfo = {
         ...entityStatus.aircraftInfo,
         adsbData: {
@@ -121,6 +127,7 @@ class ReadsbProtoDataSource {
         operator,
         countryName,
       };
+
       this.cache.set(id, entityStatus);
       this.onUpdate(entityStatus);
     });

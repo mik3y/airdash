@@ -14,7 +14,7 @@ const AircraftTable = (props) => {
   const rows = aircraft.map((a) => {
     const { adsbData } = a.aircraftInfo;
     return (
-      <tr key={adsbData.addr}>
+      <tr key={a.id}>
         <td>{adsbData.addr.toString(16).toUpperCase()}</td>
         <td>
           <tt>{adsbData.flight}</tt>

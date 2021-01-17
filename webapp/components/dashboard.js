@@ -3,10 +3,13 @@ import MapView from "./map-view";
 import DataHubContext from "AirDash/webapp/providers/DataHubContext";
 import AircraftTable from "./aircraft-table";
 import BoatTable from "./boat-table";
+import EntityDetail from "./entity-detail";
 import { Accordion, Card } from "react-bootstrap";
 
 function Dashboard() {
-  const { aircraft, boats } = useContext(DataHubContext);
+  const { aircraft, boats, activeEntity, setActiveEntityId } = useContext(
+    DataHubContext
+  );
 
   return (
     <div className="App">
@@ -15,13 +18,19 @@ function Dashboard() {
           <MapView />
         </div>
         <div className="column">
-          <h3>AirDash!</h3>
-          <Accordion defaultActiveKey="sources">
+          {activeEntity && (
             <Card>
-              <Accordion.Toggle as={Card.Header} eventKey="sources">
+              <Card.Body>
+                <EntityDetail entity={activeEntity} />
+              </Card.Body>
+            </Card>
+          )}
+          <Accordion>
+            <Card>
+              <Accordion.Toggle as={Card.Header} eventKey="settings">
                 Settings
               </Accordion.Toggle>
-              <Accordion.Collapse eventKey="sources">
+              <Accordion.Collapse eventKey="settings">
                 <Card.Body>
                   <em>Coming soon!</em>
                 </Card.Body>

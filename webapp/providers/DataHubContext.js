@@ -36,7 +36,9 @@ export const DataHubProvider = function ({ children }) {
   const setActiveEntityId = (id) => {
     // TODO(mikey): Validate here
     doSetActiveEntityId(id);
-  }
+  };
+
+  const activeEntity = entities[activeEntityId] || null;
 
   return (
     <DataHubContext.Provider
@@ -46,6 +48,7 @@ export const DataHubProvider = function ({ children }) {
         boats,
         activeEntityId,
         setActiveEntityId,
+        activeEntity,
       }}
     >
       {children}

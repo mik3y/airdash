@@ -9,6 +9,7 @@ const LRU = require("lru-cache");
 const debugLibrary = require("debug");
 const debug = debugLibrary("airdash:connection-manager");
 const geolib = require('geolib');
+
 const { PROTOCOL_AIS_TCP, PROTOCOL_AIS_SERIAL } = require('./ais-client');
 const { PROTOCOL_READSB_PROTO } = require('./readsb-proto-client');
 
@@ -38,6 +39,11 @@ class ConnectionManager {
       max: 1000,
       maxAge: 60 * 1000,
     });
+  }
+
+  getEntities() {
+    const allItems = this.entities.keys().map(k => [k, this.entities.peek(k)]);
+    return Object.fromEntries(allItems);
   }
 
   addDataSource(uri) {
@@ -95,25 +101,25 @@ class ConnectionManager {
     return dataSource;
   }
 
-  _onDataSourceUpdate(dataSource, connectionId, update) {
-    // debug(`Updating entity ${connectionId}: ${update}`);
-    const cacheKey = `${connectionId}:${update.id}`;
-    update.lastUpdatedMillis = new Date().getTime();
+  _onDataSourceUpdate(dataSource, connectionId, entityStatus) {
+    const entityId = entityStatus.id;
+    entityStatus.lastUpdatedMillis = new Date().getTime();
 
     // TODO(mikey): Properly merge updates.
-    const existing = this.entities.peek(cacheKey);
+    const existing = this.entities.peek(entityId);
     if (existing && existing.track && existing.track.length > 1) {
-      update.track = existing.track;
+      entityStatus.track = existing.track;
     }
-    this._updateTrack(update, dataSource.constructor.minimumTrackUpdateDistanceMeters);
+    this._updateTrack(entityStatus, dataSource.constructor.minimumTrackUpdateDistanceMeters);
 
-    this.entities.set(cacheKey, update);
+    this.entities.set(entityId, entityStatus);
   }
 
   _updateTrack(entityStatus, minDistanceMeters) {
     if (!entityStatus.track) {
       entityStatus.track = [];
     }
+
     const [lastTrackPosition] = entityStatus.track.slice(-1);
     let shouldAddNewPoint = false;
     if (!lastTrackPosition) {
@@ -126,15 +132,19 @@ class ConnectionManager {
       shouldAddNewPoint = distance >= minDistanceMeters;
     }
 
-    if (shouldAddNewPoint) {
-      entityStatus.track.push({
-        // TODO(mikey): Add elevation.
-        timestampMillis: entityStatus.lastUpdatedMillis,
-        lat: entityStatus.lat,
-        lon: entityStatus.lon,
-      });
-      entityStatus.track = entityStatus.track.slice(-1 * MAX_TRACK_POINTS);
+    if (!shouldAddNewPoint) {
+      return;
     }
+
+    const trackPoint = {
+      timestampMillis: entityStatus.lastUpdatedMillis,
+      lat: entityStatus.lat,
+      lon: entityStatus.lon,
+      speed: entityStatus.speed,
+      altitude: entityStatus.altitude,
+    };
+    entityStatus.track.push(trackPoint);
+    entityStatus.track = entityStatus.track.slice(-1 * MAX_TRACK_POINTS);
   }
 
   _onDataSourceError(dataSource, connectionId, error) {

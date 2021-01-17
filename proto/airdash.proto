@@ -15,9 +15,13 @@ enum EntityType {
 message EntityStatus {
     string id = 1;
     EntityType type = 2;
+
+    // Common fields.
     double lat = 3;
     double lon = 4;
-    int64 last_updated_millis = 5;
+    double altitude = 5;
+    double speed = 6;
+    int64 last_updated_millis = 7;
     
     AircraftInfo aircraft_info = 10;
     ShipInfo ship_info = 11;
@@ -57,11 +61,11 @@ message ShipInfo {
     PositionReport ais_data = 1;
 }
 
-
 // TrackPosition is an inner structure type, used in other messages here.
 message TrackPosition {
     double lat = 1;
     double lon = 2;
-    double elevation = 3;
-    int64 timestamp_millis = 4;
+    double altitude = 3;
+    double speed = 4;
+    int64 timestamp_millis = 5;
 }

@@ -73,6 +73,7 @@
     "react-refresh": "^0.8.3",
     "react-use-storage": "^0.4.3",
     "react-world-flags": "^1.4.0",
+    "recharts": "^2.0.3",
     "resolve-url-loader": "^3.1.2",
     "sass": "^1.30.0",
     "sass-loader": "8.0.2",

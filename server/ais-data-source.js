@@ -5,10 +5,9 @@ const AISClient = require("./ais-client");
 const debug = debugLibrary("airdash:ais-data-source");
 const protobufjs = require("protobufjs");
 const AISProto = protobufjs.loadSync(`${__dirname}/../proto/ais.proto`);
-const AirdashProto = protobufjs.loadSync(
-  `${__dirname}/../proto/airdash.proto`
-);
-const Settings = require('./settings');
+const AirdashProto = protobufjs.loadSync(`${__dirname}/../proto/airdash.proto`);
+const Settings = require("./settings");
+const { SPEED_UNKNOWN, ALTITUDE_UNKNOWN } = require("./constants");
 
 /** Takes a raw AIS message and creates/updates our PositionReport type. */
 const protoFromMessage = (aisMessage, existing = null) => {
@@ -165,7 +164,9 @@ class AISDataSource {
     this.url = url;
     this.onUpdate = onUpdate;
     this.onError = onError;
-    this.client = new AISClient(this.url, (message) => this._onClientMessage(message));
+    this.client = new AISClient(this.url, (message) =>
+      this._onClientMessage(message)
+    );
     this.cache = new LRU({
       max: 1000,
       maxAge: 60 * 60 * 1000,
@@ -213,17 +214,24 @@ class AISDataSource {
         id: mmsi,
         type: AirdashProto.EntityType.AIS,
       });
+
     const aisData = protoFromMessage(update, entityStatus.shipInfo.aisData);
     if (!aisData) {
       return;
     }
-    // debug(`Updating ${mmsi}`);
+
+    // Update top-level (common) fields.
+    entityStatus.lat = aisData.lat;
+    entityStatus.lon = aisData.lon;
+    entityStatus.speed =
+      aisData.speed_over_ground || entityStatus.speed || SPEED_UNKNOWN;
+    entityStatus.altitude = ALTITUDE_UNKNOWN;
+
+    // Update the shipInfo struct.
     entityStatus.shipInfo = {
       aisData,
     };
-    entityStatus.lat = aisData.lat;
-    entityStatus.lon = aisData.lon;
-    entityStatus.lastUpdatedMillis = new Date().getTime();
+
     this.cache.set(mmsi, entityStatus);
     this.onUpdate(entityStatus);
   }

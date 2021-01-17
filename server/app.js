@@ -114,11 +114,11 @@ const App = ({ initialMiddleware }) => {
     await ctx.render('index.html');
   });
 
-  const connections = new ConnectionManager();
+  const connectionManager = new ConnectionManager();
   if (Settings.dataSources) {
     Settings.dataSources.forEach((uri) => {
       try {
-        connections.addDataSource(uri);
+        connectionManager.addDataSource(uri);
         debug(`Added data source ${uri}`)
       } catch (e) {
         console.error(`Error: Failed to add data source ${uri}: ${e}`);
@@ -130,6 +130,7 @@ const App = ({ initialMiddleware }) => {
     try {
       await next();
     } catch (err) {
+      logger.error(err);  
       ctx.status = err.status || err.constructor.status || 500;
       ctx.body = {
         status: 'error',
@@ -141,7 +142,7 @@ const App = ({ initialMiddleware }) => {
   });
   
   router.get("/api/data-sources", async (ctx) => {
-    const dataSources = connections.getDataSources();
+    const dataSources = connectionManager.getDataSources();
     const result = Object.entries(dataSources).map(([id, dataSource]) => {
       return {
         id,
@@ -159,14 +160,14 @@ const App = ({ initialMiddleware }) => {
     if (!url) {
       throw new InvalidRequestError('Must provide `url`');
     }
-    await connections.addDataSource(url);
+    await connectionManager.addDataSource(url);
     ctx.body = {
       status: "ok",
     };
   });
 
   router.get("/api/entities", async (ctx) => {
-    const entities = Object.fromEntries(connections.entities.keys().map(k => [k, connections.entities.peek(k)]));
+    const entities = connectionManager.getEntities();
     ctx.body = {
       status: "ok",
       entities: entities,

@@ -5,6 +5,7 @@
 * Feature: Support reading AIS data from serial port.
 * Breaking change: URLs for AIS TCP now have the protocol `ais-tcp://`
 * Improvement: Aircraft icons now show callsign details at lower zoom levels.
+* Feature: Speed and altitude graphs.
 
 ## v0.2.0 (2021-01-01)
 
