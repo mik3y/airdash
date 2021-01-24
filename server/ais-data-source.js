@@ -197,6 +197,7 @@ class AISDataSource {
       // crash things so a developer can attend to it. Otherwise, scold in
       // logs and keep charging on.
       console.error("Error processing update:", JSON.stringify(message));
+      console.error(e);
       if (Settings.debug) {
         throw e;
       }
@@ -215,7 +216,7 @@ class AISDataSource {
         type: AirdashProto.EntityType.AIS,
       });
 
-    const aisData = protoFromMessage(update, entityStatus.shipInfo.aisData);
+    const aisData = protoFromMessage(update, entityStatus.shipInfo ? entityStatus.shipInfo.aisData : null);
     if (!aisData) {
       return;
     }
