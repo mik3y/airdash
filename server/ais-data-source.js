@@ -8,6 +8,7 @@ const AISProto = protobufjs.loadSync(`${__dirname}/../proto/ais.proto`);
 const AirdashProto = protobufjs.loadSync(`${__dirname}/../proto/airdash.proto`);
 const Settings = require("./settings");
 const { SPEED_UNKNOWN, ALTITUDE_UNKNOWN } = require("./constants");
+const { getCountryNameAndCode } = require('./ais-misc');
 
 /** Takes a raw AIS message and creates/updates our PositionReport type. */
 const protoFromMessage = (aisMessage, existing = null) => {
@@ -225,12 +226,16 @@ class AISDataSource {
     entityStatus.lat = aisData.lat;
     entityStatus.lon = aisData.lon;
     entityStatus.speed =
-      aisData.speed_over_ground || entityStatus.speed || SPEED_UNKNOWN;
+      aisData.speedOverGround || entityStatus.speed || SPEED_UNKNOWN;
     entityStatus.altitude = ALTITUDE_UNKNOWN;
+
+    const [countryName, countryCode] = getCountryNameAndCode(mmsi);
 
     // Update the shipInfo struct.
     entityStatus.shipInfo = {
       aisData,
+      countryName,
+      countryCode,
     };
 
     this.cache.set(mmsi, entityStatus);

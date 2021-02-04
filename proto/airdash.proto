@@ -59,6 +59,12 @@ message AircraftInfo {
 message ShipInfo {
     // Last-received aggregated AIS data. Always present.
     PositionReport ais_data = 1;
+
+    // Country name, if known.
+    string country_name = 2;
+
+    // ISO 3166-1 alpha-2 country code, if known.
+    string country_code = 3;
 }
 
 // TrackPosition is an inner structure type, used in other messages here.

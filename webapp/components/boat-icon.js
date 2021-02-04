@@ -1,6 +1,7 @@
 import L from "leaflet";
 import Boat from "AirDash/webapp/images/boat.svg";
 import ReactDOMServer from "react-dom/server";
+import Flag from "react-world-flags";
 
 import './boat-icon.scss'
 
@@ -29,19 +30,29 @@ const getStyleLabel = (aisData) => {
   return '';
 }
 
-const BoatIcon = (aisData) => {
+const BoatIcon = (shipInfo) => {
+  const { aisData, countryCode } = shipInfo;
   const rotation = aisData.courseOverGround || 0;
   const style = {
     ...STYLE,
     transform: `rotate(${rotation}deg)`,
   };
   const styleLabel = getStyleLabel(aisData);
+
+  const flagIcon = countryCode ? <Flag code={countryCode} className="flag-icon" /> : null;
+  const name = aisData.name || aisData.mmsi;
+
   const icon = L.divIcon({
     className: "custom-icon",
     popupAnchor: [16, -16],
     html: ReactDOMServer.renderToString(
       <div key={`icon-${aisData.mmsi}`} className="boat-icon">
         <Boat style={style} className={styleLabel} />
+        <div className="map-icon-detail">
+          <div className="callsign">
+            {flagIcon} {name}
+          </div>
+        </div>
       </div>
     ),
   });
