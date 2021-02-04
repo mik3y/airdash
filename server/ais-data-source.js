@@ -222,6 +222,13 @@ class AISDataSource {
       return;
     }
 
+    // Ignore updates before we have position information.
+    const currentLat = aisData.lat;
+    const currentLon = aisData.lon;
+    if (currentLat === 0 && currentLon === 0 && entityStatus.lat === 0 && entityStatus.lon === 0) {
+      return;
+    }
+    
     // Update top-level (common) fields.
     entityStatus.lat = aisData.lat;
     entityStatus.lon = aisData.lon;
